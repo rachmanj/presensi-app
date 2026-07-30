@@ -58,12 +58,11 @@ Aplikasi **belum memiliki kode** — masih dalam fase perencanaan. Semua impleme
 
 ## Cross-App Ecosystem (VPS)
 
-| App | Database | Port | Stack |
-|-----|----------|------|-------|
-| **ARKA HERO** | `hero_db` | 8080 | Laravel |
-| **ARKA PRESENSI** (ini) | `presensi_db` | TBD | Laravel 11 + React + AntD |
-| pos-atk-inertia | `pos_kasir` | Tailscale | Laravel + Inertia + React |
-| arkfleet-next | `arkfleet_next` | 3000 | Next.js |
+| App                     | Database        | Port | Stack                     |
+| ----------------------- | --------------- | ---- | ------------------------- |
+| **ARKA HERO**           | `hero_db`       | 8080 | Laravel                   |
+| **ARKA PRESENSI** (ini) | `presensi_db`   | TBD  | Laravel 11 + React + AntD |
+| arkfleet-next           | `arkfleet_next` | 3000 | Next.js                   |
 
 ## PHP 8.5 Pitfalls (hindari dengan pin 8.3/8.4)
 
@@ -86,6 +85,7 @@ Aplikasi **belum memiliki kode** — masih dalam fase perencanaan. Semua impleme
 ## After Implementation: Auto Commit + Push
 
 Setelah cursor-agent selesai, **SELALU** lakukan tanpa bertanya:
+
 ```bash
 git add -A && git commit -m "descriptive message" && git push origin main
 ```
@@ -95,26 +95,33 @@ git add -A && git commit -m "descriptive message" && git push origin main
 After every significant code change, you MUST update the relevant documentation:
 
 ### Architecture Changes
+
 When modifying system structure, components, or data flow:
+
 1. Update `docs/architecture.md` with current state
 2. Add/update Mermaid diagrams if data flow changed
 3. Log architectural decisions in `docs/decisions.md`
 4. Note any important discoveries in `MEMORY.md`
 
 ### Feature Development
+
 When working on tasks:
+
 1. Update progress in `docs/todo.md`
 2. Move completed items to the "Recently Completed" section
 3. Update `docs/backlog.md` if scope or priorities change
 4. Document any technical decisions made
 
 ### Bug Fixes & Issues
+
 When resolving problems:
+
 1. Log the issue and solution in `MEMORY.md`
 2. Update task status in `docs/todo.md`
 3. Update architecture docs if the fix reveals structural changes
 
 ### Decision Records
+
 - Capture context that led to the decision
 - Document alternatives that were considered
 - Include implementation implications
@@ -122,16 +129,19 @@ When resolving problems:
 ## Database Access Preferences
 
 ### MySQL MCP Integration
+
 - **ALWAYS use MySQL MCP** for database queries instead of Laravel Tinker commands
 - MCP provides direct, safe access to the `presensi_db` database
 - Query the database directly using natural language requests
 
 ### When to Use Each Tool
+
 - **MySQL MCP**: Data inspection, analysis, counts, structure exploration
 - **Laravel Artisan**: Migrations, seeding, cache clearing, queue management
 - **Manual file editing**: Code changes, configuration updates
 
 ## Cross-Referencing Rules
+
 - Always check existing documentation before adding new content
 - Link related decisions, tasks, and architecture changes
 - Update multiple files when changes affect multiple areas
