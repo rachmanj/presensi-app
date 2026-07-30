@@ -41,4 +41,10 @@
 
 **Solution**: Created `docs/action-plan.md` covering ERD, 14 migrations with exact columns/indexes, 5 seeders (incl. full 62-cell matrix from `kode-absensi-matrix.md`), model relationships, 6 service class signatures, 3 jobs, frontend tree, complete route list, and phase breakdown.
 
-**Key Learning**: Several concept decisions remain genuinely open (day6/day7 definition for Coal sites, HARI KERJA formula, cross-sheet employee assignment rule) — these are flagged explicitly in `docs/action-plan.md` §14 rather than guessed, so implementation can stub them safely instead of producing silently wrong output.
+### [M003] Fase 0 Foundation Implemented (2026-07-30) ✅ COMPLETE
+
+**Challenge**: Greenfield repo had only docs — needed full Laravel 11 + React SPA scaffold with 14-table schema, seed data, HERO client, and admin UI.
+
+**Solution**: Scaffolded Laravel 11 (v11.55) with Sanctum SPA auth, React 18 + Ant Design Pro in `frontend/`, 14 migrations on `presensi_db`, 5 seeders (8 sites, 64 matrix rules, 26 daytype codes, 16 holidays, 2 report templates), `HeroApiClient` with Redis cache + circuit breaker, `SyncHeroMasterData` job, admin CRUD API + ProTable pages.
+
+**Key Learning**: MySQL unique index names >64 chars fail silently during migration — use explicit short names. Vite 8 + Ant Design Pro requires `rc-field-form` as explicit dependency for production build.

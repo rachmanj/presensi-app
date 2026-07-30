@@ -48,40 +48,48 @@ This document describes the CURRENT WORKING STATE of the application architectur
 
 ## Project Overview
 
-[Brief description of what this system does]
+ARKA PRESENSI automates monthly attendance processing for HR: ingest fingerprint scans, run a deterministic attendance code engine (matrix + HERO leave/LOT data), review/override in a grid, and export Excel reports per site profile.
+
+**Current status (Fase 0 complete):** Laravel 11 API backend + React 18 SPA frontend with Sanctum cookie auth, configuration admin CRUD, HERO API client (cached), and database schema for full attendance pipeline.
 
 ## Technology Stack
 
-- **Frontend**: [Framework and key libraries]
-- **Backend**: [Framework, database, key services]
-- **Infrastructure**: [Deployment, monitoring, external services]
+- **Frontend**: React 18, Vite 8, Ant Design 5, @ant-design/pro-components, React Router, TanStack Query, Axios
+- **Backend**: Laravel 11 (PHP 8.3/8.4 pin), Laravel Sanctum (SPA mode), MySQL 8.4 (`presensi_db`), Redis (HERO cache + circuit breaker), database queue driver
+- **Infrastructure**: Local dev — `php artisan serve` (:8000) + `npm run dev` in `frontend/` (:5173) with Vite proxy to `/api` and `/sanctum`
 
 ## Core Components
 
-[Describe your main system components]
-
-## Database Schema
-
-[Current tables and relationships]
-
-## API Design
-
-[Key endpoints and data flows]
-
-## Data Flow
-
 ```mermaid
-graph TD
-    A[User Input] --> B[Validation]
-    B --> C[Processing]
-    C --> D[Database]
-    D --> E[Response]
-
-## Security Implementation
-
-[Current security measures]
-
-## Deployment
-
-[How the system is deployed]
+flowchart LR
+    SPA["React SPA\nfrontend/"] -->|cookie auth| API["Laravel API\nApi/V1/*"]
+    API --> DB[("presensi_db")]
+    API --> HERO["HeroApiClient"]
+    HERO --> Redis[("Redis")]
+    HERO --> HEROAPI["ARKA HERO :8080"]
+    API --> Queue["database queue\nsync/imports/generate"]
 ```
+
+### Implemented (Fase 0)
+
+| Component | Location | Purpose |
+| --- | --- | --- |
+| Auth (Sanctum SPA) | `AuthController`, `frontend/src/pages/Login/` | Session cookie login for SPA |
+| Admin CRUD | `SiteController`, `MatrixRuleController`, etc. | Manage sites, matrix, daytype codes, holidays, templates |
+| HeroApiClient | `app/Services/HeroApiClient.php` | Read-only HERO API with Redis cache + circuit breaker |
+| SyncHeroMasterData | `app/Jobs/SyncHeroMasterData.php` | Upsert `hero_employee_caches`, hourly schedule |
+| Dashboard | `DashboardController`, `DashboardPage` | Summary counts (sites, periods) |
+
+### Database Tables (14 domain + Laravel defaults)
+
+`sites`, `matrix_rules`, `site_daytype_codes`, `holiday_calendars`, `report_templates`, `hero_employee_caches`, `employee_maps`, `attendance_periods`, `attendance_sheets`, `attendance_rows`, `attendance_cells`, `attendance_cell_traces`, `fingerprint_imports`, `fingerprint_scans`
+
+## API Endpoints (Fase 0)
+
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- `GET /api/dashboard/summary`
+- `apiResource` on `/api/sites`, `/api/matrix-rules` (+ `GET /api/matrix-rules/grid`), `/api/site-daytype-codes`, `/api/holiday-calendars`, `/api/report-templates`
+
+## Default Dev Credentials
+
+- Email: `admin@arka.local` / Password: `password`

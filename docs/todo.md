@@ -43,32 +43,24 @@ Include relevant context in brackets to help with future AI-assisted coding:
 
 ## Working On Now
 
-- `[WIP] P1: Implement user authentication [src/auth/login.tsx, Firebase Auth]`
+- `[ ] P0: Fase 1 Step 1.1 — FingerprintParser + Import module [docs/action-plan.md §11]`
 
 ## Up Next (This Week)
 
-- `[ ] P0: Fix database connection timeout [src/db/connection.ts, line 23]`
-- `[ ] P1: Add error handling to API calls [API endpoints: /users, /profile]`
+- `[ ] P0: Fase 1 — MVP attendance engine, review grid, export [docs/action-plan.md §11]`
 
 ## Blocked/Waiting
 
-- `[blocked] P2: Add payment integration [waiting for Stripe API keys]`
-
-## Recently Completed
-
-- `[done] P0: Set up database schema [users table, profiles table] (completed: 2025-01-15)`
-- `[done] P1: Create basic routing [React Router setup] (completed: 2025-01-14)`
-
-## Recently Completed
-
-- `[done] P0: Create detailed phase-by-phase implementation action plan [docs/action-plan.md] (completed: 2026-07-30)`
-
-## Up Next
-
-- `[ ] P0: Fase 0 Step 0.1 — Laravel 11 + Sanctum scaffold, React/Vite frontend scaffold [docs/action-plan.md §11]`
-- `[ ] P0: Fase 0 Step 0.2 — create presensi_db, run 14 migrations [docs/action-plan.md §5]`
-- `[ ] P0: Fase 0 Step 0.3 — run 5 seeders (Site, MatrixRule, SiteDaytypeCode, HolidayCalendar, ReportTemplate) [docs/action-plan.md §6]`
 - `[blocked] P1: HolidayCalendarSeeder needs confirmed 2026 national holiday dates from Iwan [docs/action-plan.md §14.6]`
+- `[blocked] P1: HERO API connectivity — needs HERO_API_KEY and verified HERO_BASE_URL [docs/action-plan.md §14.2]`
+
+## Recently Completed
+
+- `[done] P0: Fase 0 — Laravel 11 + Sanctum + React/AntD frontend scaffold (completed: 2026-07-30)`
+- `[done] P0: Fase 0 — 14 migrations + 5 seeders on presensi_db (completed: 2026-07-30)`
+- `[done] P0: Fase 0 — HeroApiClient + SyncHeroMasterData job + hero:sync-test command (completed: 2026-07-30)`
+- `[done] P0: Fase 0 — Auth SPA + AppLayout + Admin CRUD pages (completed: 2026-07-30)`
+- `[done] P0: Create detailed phase-by-phase implementation action plan [docs/action-plan.md] (completed: 2026-07-30)`
 
 ## Quick Notes
 
