@@ -5,6 +5,13 @@ import AppLayout from './components/layout/AppLayout';
 import RequireAuth from './components/layout/RequireAuth';
 import LoginPage from './pages/Login/LoginPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
+import ImportListPage from './pages/Import/ImportListPage';
+import ImportUploadPage from './pages/Import/ImportUploadPage';
+import EmployeeMappingPage from './pages/Mapping/EmployeeMappingPage';
+import PeriodListPage from './pages/Attendance/PeriodListPage';
+import SheetDetailPage from './pages/Attendance/SheetDetailPage';
+import SheetReviewPage from './pages/Attendance/SheetReviewPage';
+import ExportPage from './pages/Export/ExportPage';
 import SiteConfigPage from './pages/Admin/SiteConfigPage';
 import MatrixConfigPage from './pages/Admin/MatrixConfigPage';
 import SiteDaytypeCodePage from './pages/Admin/SiteDaytypeCodePage';
@@ -17,15 +24,6 @@ const queryClient = new QueryClient({
   },
 });
 
-function PlaceholderPage({ title }) {
-  return (
-    <div style={{ padding: 24 }}>
-      <h2>{title}</h2>
-      <p>Coming in Fase 1.</p>
-    </div>
-  );
-}
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -36,10 +34,13 @@ export default function App() {
             <Route element={<RequireAuth />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/import" element={<PlaceholderPage title="Import Fingerprint" />} />
-                <Route path="/mapping" element={<PlaceholderPage title="Employee Mapping" />} />
-                <Route path="/attendance" element={<PlaceholderPage title="Attendance" />} />
-                <Route path="/export" element={<PlaceholderPage title="Export" />} />
+                <Route path="/import" element={<ImportListPage />} />
+                <Route path="/import/upload" element={<ImportUploadPage />} />
+                <Route path="/mapping" element={<EmployeeMappingPage />} />
+                <Route path="/attendance" element={<PeriodListPage />} />
+                <Route path="/attendance/:periodId" element={<SheetDetailPage />} />
+                <Route path="/attendance/sheet/:sheetId/review" element={<SheetReviewPage />} />
+                <Route path="/export" element={<ExportPage />} />
                 <Route path="/admin/sites" element={<SiteConfigPage />} />
                 <Route path="/admin/matrix" element={<MatrixConfigPage />} />
                 <Route path="/admin/daytype-codes" element={<SiteDaytypeCodePage />} />

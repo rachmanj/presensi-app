@@ -48,3 +48,11 @@
 **Solution**: Scaffolded Laravel 11 (v11.55) with Sanctum SPA auth, React 18 + Ant Design Pro in `frontend/`, 14 migrations on `presensi_db`, 5 seeders (8 sites, 64 matrix rules, 26 daytype codes, 16 holidays, 2 report templates), `HeroApiClient` with Redis cache + circuit breaker, `SyncHeroMasterData` job, admin CRUD API + ProTable pages.
 
 **Key Learning**: MySQL unique index names >64 chars fail silently during migration — use explicit short names. Vite 8 + Ant Design Pro requires `rc-field-form` as explicit dependency for production build.
+
+### [M004] Fase 1 MVP — Attendance Pipeline (2026-07-30) ✅ COMPLETE
+
+**Challenge**: Implement full fingerprint→engine→review→export pipeline matching Juni 2026 golden files (≥95% cell match).
+
+**Solution**: Built `FingerprintParser` (Format 1 BIFF4 via Python/xlrd fallback + Format 2 PhpSpreadsheet), `AttendanceCodeEngine` pipeline with traces, `ReportExporter` (OpenSpout v5), queue jobs, full API + React pages, `php artisan attendance:golden-test` regression command.
+
+**Key Learning**: HO fingerprint input is BIFF4 (not OLE) — PhpSpreadsheet Xls reader fails; xlrd Python fallback required. Golden test: `reResolveScanNiks` must not null-out `resolved_nik` on golden-seeded scans when no EmployeeMap exists. **Golden test result: HO 99.55%, APS 97.96%, overall 99.04%.**
