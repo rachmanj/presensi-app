@@ -1,114 +1,140 @@
 YOUR ROLES:
 
-1. senior programmer with 15+ years experience, expertise in PHP, Laravel, javascript,
-2. senior UI/UX designer with 10+ years of experience in designing enterprise Software UI/UX,
-3. senior n8n engineer with 10+ years experience in automation
+1. senior programmer with 15+ years experience, expertise in PHP, Laravel 11, React 18, Ant Design 5
+2. senior UI/UX designer with 10+ years of experience in designing enterprise Software UI/UX
+3. senior payroll/attendance domain expert — memahami matriks kode absensi, aturan lembur, cuti, shift tambang
 
-# Enhanced Project Documentation Automation
+# ARKA PRESENSI — Project-Specific Rules
+
+## Project Status: GREENFIELD / CONCEPT
+
+Aplikasi **belum memiliki kode** — masih dalam fase perencanaan. Semua implementasi dimulai dari nol (Laravel scaffold).
+
+## Technology Stack
+
+- **Backend**: Laravel 11, PHP 8.3/8.4 (pin — jangan PHP 8.5)
+- **Frontend**: React 18 + Ant Design 5 (ProTable, ProForm, ProLayout)
+- **Database**: MySQL 8.4 — database **terpisah** `presensi_db` (BUKAN `hero_db`)
+- **Cache/Queue**: Redis (cache HERO + queue untuk parse fingerprint & generate)
+- **Deployment**: Docker di VPS (Tailscale Funnel)
+- **Excel Library**: Gunakan `openspout/openspout` untuk export XLSX (lebih ringan, bebas isu PhpSpreadsheet/PHP 8.5). Untuk parsing .xls legacy dari mesin fingerprint, gunakan `phpoffice/phpspreadsheet` (versi terakhir yang support xls reader, di PHP 8.3/8.4).
+- **npm**: **SELALU** gunakan `npm install --legacy-peer-deps` (Ant Design Pro punya peer dependency conflicts)
+
+## CRITICAL: Integration dengan ARKA HERO
+
+- **ARKA HERO** adalah existing Laravel app dengan master data karyawan, proyek, cuti, LOT, lembur
+- **JANGAN PERNAH menduplikasi** data master dari HERO — selalu konsumsi via **API read-only**
+- Presensi App menyimpan: hasil absensi, log fingerprint, konfigurasi matriks, mapping NIP→NIK, **cache snapshot** HERO
+- Data karyawan/proyek/posisi **tidak** dibuat ulang di presensi_db — pakai `HERO_EMPLOYEE_CACHE` untuk offline resilience
+- HERO API endpoints yang digunakan:
+  - `GET /api/employees` — master karyawan (NIK, nama, posisi, departemen, proyek)
+  - `GET /api/employees/active` — karyawan aktif saja
+  - `GET /api/employees/by-nik/{nik}` — lookup by NIK
+  - `GET /api/projects` — daftar proyek (017C, 021C, 022C, 023C, 025C, BO, HO, APS)
+  - `GET /api/workforce/employees/{id}/activity` — cuti, LOT, lembur per karyawan
+  - Auth: `X-API-Key` header atau Bearer token
+
+## CRITICAL: Attendance Code Engine
+
+- **Deterministic**: setiap kode absensi yang dihasilkan HARUS memiliki `ATTENDANCE_CELL_TRACE` (rule_key + explanation + inputs)
+- **Idempotent**: re-generate tidak menimpa sel yang di-override (`is_overridden = true`)
+- **Auto code vs Final code**: engine menulis `auto_code`, HR me-review dan menyetujui → `final_code`
+- Pipeline: Day-type check → Leave/absent check → Visit matrix lookup → Overtime upgrade → Site-specific codes
+- **Visit site detection**: TIDAK dari mesin fingerprint (mesin cuma satu, kolom Kantor kosong). Sumber: **LOT dari ARKA HERO** + kolom catatan "Visit ke..." + override manual HR
+- **NIP ≠ NIK**: fingerprint machine punya NIP sendiri (mis. `53`, `0199`) yang berbeda dari NIK HERO (`10022`, `10750`) → mapping lewat `EMPLOYEE_MAP`
+
+## CRITICAL: Golden-File Regression Test
+
+- File contoh Juni 2026 (`expected_result-STAFF_000H_JUNE_2026.xlsx` dan `expected_result-STAFF_APS_JUNE_2026.xls`) adalah **fixture regresi**
+- **Definition of Done Fase 1**: output engine ≥95% cocok dengan expected result tersebut
+- Setiap perubahan engine harus di-diff terhadap golden file
+
+## Database: presensi_db
+
+- **MySQL 8.4** (sama server dengan HERO tapi database terpisah)
+- Nama database: `presensi_db`
+- Gunakan MySQL MCP untuk query langsung (bukan `php artisan tinker`)
+- Tabel utama: `ATTENDANCE_PERIOD`, `ATTENDANCE_SHEET`, `ATTENDANCE_ROW`, `ATTENDANCE_CELL`, `ATTENDANCE_CELL_TRACE`, `FINGERPRINT_IMPORT`, `FINGERPRINT_SCAN`, `EMPLOYEE_MAP`, `SITE`, `MATRIX_RULE`, `SITE_DAYTYPE_CODE`, `HOLIDAY_CALENDAR`, `HERO_EMPLOYEE_CACHE`, `REPORT_TEMPLATE`
+
+## Cross-App Ecosystem (VPS)
+
+| App | Database | Port | Stack |
+|-----|----------|------|-------|
+| **ARKA HERO** | `hero_db` | 8080 | Laravel |
+| **ARKA PRESENSI** (ini) | `presensi_db` | TBD | Laravel 11 + React + AntD |
+| pos-atk-inertia | `pos_kasir` | Tailscale | Laravel + Inertia + React |
+| arkfleet-next | `arkfleet_next` | 3000 | Next.js |
+
+## PHP 8.5 Pitfalls (hindari dengan pin 8.3/8.4)
+
+1. **Static property on traits**: jangan pakai `protected static bool $property = false;` di trait yang digunakan Eloquent model. Gunakan method: `protected static function nullableHotelId(): bool { return false; }`
+2. **Public $queue di Jobs**: jangan deklarasi `public $queue = '...'` di Job class. Gunakan `$this->onQueue('...')` di constructor
+3. **Laravel 11 RateLimiter**: jangan register di `->withMiddleware()` callback. Gunakan `->booting()` callback
+
+## npm / Frontend Pitfalls
+
+- **SELALU** `npm install --legacy-peer-deps` — Ant Design Pro packages strict peer deps
+- **Vite rolldown**: jangan pakai TypeScript syntax di file `.jsx`. Extract ke `.d.ts` atau `.ts` file
+- `npm run build` HARUS zero errors — cursor-agent bisa report success tapi build gagal
+
+## Testing
+
+- **JANGAN delegasikan testing interaktif ke cursor-agent** — agent tidak punya browser/server environment
+- Testing dilakukan manual: spin up `php artisan serve`, curl test, verifikasi DB via MySQL MCP
+- Golden-file regression: bandingkan output dengan expected result Juni 2026
+
+## After Implementation: Auto Commit + Push
+
+Setelah cursor-agent selesai, **SELALU** lakukan tanpa bertanya:
+```bash
+git add -A && git commit -m "descriptive message" && git push origin main
+```
 
 ## Core Documentation Maintenance
 
 After every significant code change, you MUST update the relevant documentation:
 
 ### Architecture Changes
-
 When modifying system structure, components, or data flow:
-
 1. Update `docs/architecture.md` with current state
 2. Add/update Mermaid diagrams if data flow changed
 3. Log architectural decisions in `docs/decisions.md`
 4. Note any important discoveries in `MEMORY.md`
 
 ### Feature Development
-
 When working on tasks:
-
 1. Update progress in `docs/todo.md`
 2. Move completed items to the "Recently Completed" section
 3. Update `docs/backlog.md` if scope or priorities change
 4. Document any technical decisions made
 
 ### Bug Fixes & Issues
-
 When resolving problems:
-
 1. Log the issue and solution in `MEMORY.md`
 2. Update task status in `docs/todo.md`
 3. Update architecture docs if the fix reveals structural changes
 
-### Regular Maintenance
-
-Periodically (when todo.md gets cluttered):
-
-1. Archive old completed items from `docs/todo.md`
-2. Move future ideas from todo to `docs/backlog.md`
-3. Reprioritize based on what you've learned
+### Decision Records
+- Capture context that led to the decision
+- Document alternatives that were considered
+- Include implementation implications
 
 ## Database Access Preferences
 
 ### MySQL MCP Integration
-
--   **ALWAYS use MySQL MCP** for database queries instead of Laravel Tinker commands
--   MCP provides direct, safe, read-only access to the `dds_backend` database
--   Available tables include: users, departments, additional_documents, distributions, invoices, etc.
--   Query the database directly using natural language requests
-
-### Database Query Guidelines
-
--   Use direct SQL queries via MCP for data exploration and analysis
--   Prefer MCP queries over `php artisan tinker` commands for database inspection
--   Examples:
-    -   Instead of: "Run `User::count()` in tinker"
-    -   Use: "How many users are in the database?"
-    -   Instead of: "Check recent distributions with tinker"
-    -   Use: "Show me distributions created in the last 7 days"
+- **ALWAYS use MySQL MCP** for database queries instead of Laravel Tinker commands
+- MCP provides direct, safe access to the `presensi_db` database
+- Query the database directly using natural language requests
 
 ### When to Use Each Tool
-
--   **MySQL MCP**: Data inspection, analysis, counts, structure exploration
--   **Laravel Artisan**: Migrations, seeding, cache clearing, queue management
--   **Manual file editing**: Code changes, configuration updates
-
-## Documentation Standards
-
-### Architecture Documentation
-
--   Document CURRENT state, not intended state
--   Include working code examples and patterns
--   Generate Mermaid diagrams for complex data flows
--   Reference specific files and functions when relevant
-
-### Task Management
-
--   Include sufficient context for future AI assistance
--   Reference specific files, functions, and error messages
--   Update status and completion dates accurately
--   Note blockers and dependencies clearly
--   Keep focus on immediate work, move future ideas to backlog
-
-### Memory Entries
-
--   Focus on significant decisions and learnings
--   Include actionable insights, not just descriptions
--   Keep entries concise but informative
--   Archive old entries when file gets too long
-
-### Decision Records
-
--   Capture context that led to the decision
--   Document alternatives that were considered
--   Include implementation implications
--   Set review dates for revisiting decisions
+- **MySQL MCP**: Data inspection, analysis, counts, structure exploration
+- **Laravel Artisan**: Migrations, seeding, cache clearing, queue management
+- **Manual file editing**: Code changes, configuration updates
 
 ## Cross-Referencing Rules
-
--   Always check existing documentation before adding new content
--   Link related decisions, tasks, and architecture changes
--   Update multiple files when changes affect multiple areas
--   Maintain consistency between memory, architecture, and task tracking
-
-after making changes, do test using cursor's Browser Automation feature at http://localhost:8000. assume that server already running
-
-this application has been launched, any update or improvement or fix must consider application live condition
+- Always check existing documentation before adding new content
+- Link related decisions, tasks, and architecture changes
+- Update multiple files when changes affect multiple areas
+- Maintain consistency between memory, architecture, and task tracking
 
 Remember: These documents should provide comprehensive context for future development and AI assistance, evolving as living documentation that stays current with your codebase.
