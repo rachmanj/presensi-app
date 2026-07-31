@@ -8,7 +8,7 @@ class HeroEmployeeCache extends Model
 {
     protected $fillable = [
         'nik', 'hero_employee_uuid', 'fullname', 'position',
-        'department', 'project_code', 'is_active', 'synced_at', 'raw',
+        'department', 'project_code', 'is_active', 'synced_at', 'raw', 'leave_balance',
     ];
 
     protected function casts(): array
@@ -17,6 +17,7 @@ class HeroEmployeeCache extends Model
             'is_active' => 'boolean',
             'synced_at' => 'datetime',
             'raw' => 'array',
+            'leave_balance' => 'array',
         ];
     }
 }

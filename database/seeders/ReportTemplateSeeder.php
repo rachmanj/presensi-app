@@ -23,6 +23,7 @@ class ReportTemplateSeeder extends Seeder
                     ],
                 ],
                 'footer_config' => [
+                    'include_overtime_hours' => true,
                     'keterangan' => [
                         'Terlambat',
                         'Tidak Finger Print Masuk',
@@ -53,7 +54,7 @@ class ReportTemplateSeeder extends Seeder
                         ['columns' => ['Sabtu', 'HOS2', 'HOA2', '1901', '1902', '1903', '1904', '1905', '1906', 'SCB', 'Kosong', 'TOTAL', 'HARI KERJA']],
                     ],
                 ],
-                'footer_config' => ['totals_row' => true],
+                'footer_config' => ['totals_row' => true, 'include_overtime_hours' => true],
                 'signature_config' => [
                     'blocks' => ['Prepared by (HR Supervisor APS)', 'Approved By (Project Manager)'],
                     'doc_no' => 'ARKA/HCS/IV/02.01',

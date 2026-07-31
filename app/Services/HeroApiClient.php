@@ -44,6 +44,26 @@ class HeroApiClient
         return $this->cachedRequest('GET', '/api/projects', [], 'hero:projects', 21600);
     }
 
+    public function getLeaveBalance(string $nik): ?array
+    {
+        $employee = $this->getEmployeeByNik($nik);
+        $employeeId = $employee['id'] ?? $employee['uuid'] ?? null;
+
+        if (! $employeeId) {
+            return null;
+        }
+
+        $result = $this->cachedRequest(
+            'GET',
+            "/api/leave/employees/{$employeeId}/balance",
+            [],
+            "hero:leave-balance:{$nik}",
+            3600
+        );
+
+        return $result ?: null;
+    }
+
     public function getActivity(string $nik, int $year, ?int $month = null): array
     {
         $query = ['year' => $year];

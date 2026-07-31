@@ -159,6 +159,12 @@ class ReportExporter
 
         $summary = $this->buildSummaryColumns($row, $template);
 
+        $includeOvertime = ($template->footer_config['include_overtime_hours'] ?? false);
+        if ($includeOvertime) {
+            $otHours = round((float) $row->cells->sum('overtime_hours'), 2);
+            $summary[] = $otHours;
+        }
+
         return array_merge(
             [$no, $row->employee_name, $row->nik, $row->position ?? ''],
             $dateCells,

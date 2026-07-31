@@ -3,10 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { Button, Space, Tag, message } from 'antd';
 import { attendanceService } from '../../services/attendanceService';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function SheetDetailPage() {
   const { periodId } = useParams();
   const queryClient = useQueryClient();
+  const { data: user } = useAuth();
+  const canGenerate = ['hr_supervisor', 'admin'].includes(user?.role);
 
   const { data: sheets, isLoading } = useQuery({
     queryKey: ['period-sheets', periodId],
@@ -43,7 +46,7 @@ export default function SheetDetailPage() {
           <Link to={`/attendance/sheet/${record.id}/review`}>
             <Button type="link" size="small">Review Grid</Button>
           </Link>
-          <Button type="link" size="small" onClick={() => generate.mutate(record.id)}>Generate</Button>
+          <Button type="link" size="small" onClick={() => generate.mutate(record.id)} disabled={!canGenerate}>Generate</Button>
           <Link to={`/export?sheet=${record.id}`}>
             <Button type="link" size="small">Export</Button>
           </Link>

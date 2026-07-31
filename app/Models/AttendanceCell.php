@@ -11,7 +11,7 @@ class AttendanceCell extends Model
     protected $fillable = [
         'row_id', 'work_date', 'day_of_month', 'day_type',
         'auto_code', 'final_code', 'is_overridden',
-        'override_by', 'override_reason', 'visit_site_code',
+        'override_by', 'override_reason', 'visit_site_code', 'overtime_hours',
     ];
 
     protected function casts(): array

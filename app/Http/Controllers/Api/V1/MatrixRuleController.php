@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\MatrixRule;
 use App\Models\Site;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -44,7 +45,7 @@ class MatrixRuleController extends Controller
         return response()->json(['sites' => $sites, 'grid' => $grid]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, AuditLogService $audit): JsonResponse
     {
         $data = $request->validate([
             'home_site_code' => ['required', 'string', 'max:10', 'exists:sites,code'],
@@ -57,6 +58,8 @@ class MatrixRuleController extends Controller
 
         $rule = MatrixRule::create($data);
 
+        $audit->log('matrix.create', 'MatrixRule', $rule->id, null, $data, null, $request->user());
+
         return response()->json($rule->load(['homeSite', 'visitSite']), 201);
     }
 
@@ -65,7 +68,7 @@ class MatrixRuleController extends Controller
         return response()->json($matrixRule->load(['homeSite', 'visitSite']));
     }
 
-    public function update(Request $request, MatrixRule $matrixRule): JsonResponse
+    public function update(Request $request, MatrixRule $matrixRule, AuditLogService $audit): JsonResponse
     {
         $data = $request->validate([
             'home_site_code' => ['sometimes', 'string', 'max:10', 'exists:sites,code'],
@@ -76,14 +79,20 @@ class MatrixRuleController extends Controller
             'effective_to' => ['nullable', 'date'],
         ]);
 
+        $old = $matrixRule->only(array_keys($data));
         $matrixRule->update($data);
+
+        $audit->log('matrix.update', 'MatrixRule', $matrixRule->id, $old, $data, null, $request->user());
 
         return response()->json($matrixRule->load(['homeSite', 'visitSite']));
     }
 
-    public function destroy(MatrixRule $matrixRule): JsonResponse
+    public function destroy(Request $request, MatrixRule $matrixRule, AuditLogService $audit): JsonResponse
     {
+        $old = $matrixRule->toArray();
         $matrixRule->delete();
+
+        $audit->log('matrix.delete', 'MatrixRule', $matrixRule->id, $old, null, null, $request->user());
 
         return response()->json(null, 204);
     }

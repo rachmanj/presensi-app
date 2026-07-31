@@ -5,7 +5,11 @@ import { Spin, Table } from 'antd';
 import { attendanceService } from '../../services/attendanceService';
 import { useAttendanceGrid } from '../../hooks/useAttendanceGrid';
 import CodeBadge from '../../components/shared/CodeBadge';
+import LeaveBalanceBadge from '../../components/shared/LeaveBalanceBadge';
+import { useAuth } from '../../hooks/useAuth';
 import CellEditModal from './CellEditModal';
+
+const CAN_OVERRIDE = ['hr_supervisor', 'admin'];
 
 const DAY_TYPE_BG = {
   saturday: '#fff7e6',
@@ -16,6 +20,8 @@ const DAY_TYPE_BG = {
 export default function SheetReviewPage() {
   const { sheetId } = useParams();
   const [editCell, setEditCell] = useState(null);
+  const { data: user } = useAuth();
+  const canOverride = CAN_OVERRIDE.includes(user?.role);
   const { data, isLoading, updateCell } = useAttendanceGrid(sheetId);
 
   const { data: sheetInfo } = useQuery({
@@ -30,7 +36,14 @@ export default function SheetReviewPage() {
 
   const frozenCols = [
     { title: 'No', dataIndex: 'no', fixed: 'left', width: 50 },
-    { title: 'Nama', dataIndex: 'employee_name', fixed: 'left', width: 180, ellipsis: true },
+    { title: 'Nama', dataIndex: 'employee_name', fixed: 'left', width: 180, ellipsis: true,
+      render: (name, record) => (
+        <span>
+          {name}
+          <LeaveBalanceBadge balance={record.leave_balance} />
+        </span>
+      ),
+    },
     { title: 'NIK', dataIndex: 'nik', fixed: 'left', width: 90 },
     { title: 'Position', dataIndex: 'position', fixed: 'left', width: 140, ellipsis: true },
   ];
@@ -50,8 +63,8 @@ export default function SheetReviewPage() {
         if (!cell) return null;
         return (
           <div
-            style={{ cursor: 'pointer', textAlign: 'center' }}
-            onClick={() => setEditCell({ ...cell, dayOfMonth: day, employeeName: record.employee_name })}
+            style={{ cursor: canOverride ? 'pointer' : 'default', textAlign: 'center' }}
+            onClick={() => canOverride && setEditCell({ ...cell, dayOfMonth: day, employeeName: record.employee_name })}
           >
             <CodeBadge
               code={cell.final_code || cell.auto_code}

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceCell;
 use App\Models\AttendanceSheet;
 use App\Services\AttendanceCodeEngine;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -16,12 +17,14 @@ class AttendanceCellController extends Controller
         return response()->json($cell->load(['traces', 'row']));
     }
 
-    public function update(Request $request, AttendanceCell $cell): JsonResponse
+    public function update(Request $request, AttendanceCell $cell, AuditLogService $audit): JsonResponse
     {
         $data = $request->validate([
             'final_code' => ['nullable', 'string', 'max:20'],
             'override_reason' => ['required_with:final_code', 'string', 'max:255'],
         ]);
+
+        $old = ['final_code' => $cell->final_code, 'is_overridden' => $cell->is_overridden];
 
         $cell->update([
             'final_code' => $data['final_code'] ?? $cell->final_code,
@@ -29,6 +32,16 @@ class AttendanceCellController extends Controller
             'override_by' => $request->user()?->name,
             'override_reason' => $data['override_reason'] ?? $cell->override_reason,
         ]);
+
+        $audit->log(
+            'cell.override',
+            'AttendanceCell',
+            $cell->id,
+            $old,
+            ['final_code' => $cell->final_code, 'override_reason' => $cell->override_reason],
+            $data['override_reason'] ?? null,
+            $request->user()
+        );
 
         $row = $cell->row;
         $sheet = $row->sheet;
@@ -42,7 +55,7 @@ class AttendanceCellController extends Controller
         return response()->json($cell->traces()->orderBy('created_at')->get());
     }
 
-    public function bulkUpdate(Request $request, AttendanceSheet $sheet): JsonResponse
+    public function bulkUpdate(Request $request, AttendanceSheet $sheet, AuditLogService $audit): JsonResponse
     {
         $data = $request->validate([
             'updates' => ['required', 'array', 'min:1'],
@@ -54,12 +67,14 @@ class AttendanceCellController extends Controller
         $updated = [];
         foreach ($data['updates'] as $item) {
             $cell = AttendanceCell::find($item['cell_id']);
+            $old = ['final_code' => $cell->final_code];
             $cell->update([
                 'final_code' => $item['final_code'],
                 'is_overridden' => true,
                 'override_by' => $request->user()?->name,
                 'override_reason' => $item['override_reason'],
             ]);
+            $audit->log('cell.override', 'AttendanceCell', $cell->id, $old, ['final_code' => $cell->final_code], $item['override_reason'], $request->user());
             $updated[] = $cell;
         }
 

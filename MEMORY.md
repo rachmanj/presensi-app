@@ -56,3 +56,9 @@
 **Solution**: Built `FingerprintParser` (Format 1 BIFF4 via Python/xlrd fallback + Format 2 PhpSpreadsheet), `AttendanceCodeEngine` pipeline with traces, `ReportExporter` (OpenSpout v5), queue jobs, full API + React pages, `php artisan attendance:golden-test` regression command.
 
 **Key Learning**: HO fingerprint input is BIFF4 (not OLE) — PhpSpreadsheet Xls reader fails; xlrd Python fallback required. Golden test: `reResolveScanNiks` must not null-out `resolved_nik` on golden-seeded scans when no EmployeeMap exists. **Golden test result: HO 99.55%, APS 97.96%, overall 99.04%.**
+
+### [M005] Fase 2 Enhancement — Dashboard, RBAC, Audit (2026-07-31) ✅ COMPLETE
+
+**Challenge**: MVP needed real-time dashboard, overtime hours, PDF export, multi-month comparison, HERO leave balance, role-based access, and audit trail without regressing golden test.
+
+**Solution**: Added `DashboardService` (today stats/trend/overtime), `calculateOvertimeHours` in engine + `overtime_hours` column, `PdfExporter` (dompdf), comparison API + UI, `leave_balance` cache sync, `CheckRole` middleware with 3 seeded users, `audit_logs` table + logging on key actions, fingerprint webhook stub. Golden test still **99.04%**.

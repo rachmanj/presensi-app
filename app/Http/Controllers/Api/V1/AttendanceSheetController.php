@@ -7,6 +7,7 @@ use App\Jobs\GenerateAttendanceSheet;
 use App\Models\AttendancePeriod;
 use App\Models\AttendanceSheet;
 use App\Models\ReportTemplate;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -45,7 +46,7 @@ class AttendanceSheetController extends Controller
         return response()->json($sheet->load(['period', 'reportTemplate']));
     }
 
-    public function generate(AttendanceSheet $sheet): JsonResponse
+    public function generate(Request $request, AttendanceSheet $sheet, AuditLogService $audit): JsonResponse
     {
         if ($sheet->status === 'finalized') {
             return response()->json(['message' => 'Cannot regenerate finalized sheet'], 422);
@@ -53,6 +54,8 @@ class AttendanceSheetController extends Controller
 
         Cache::put("sheet:{$sheet->id}:generate_status", 'queued', 3600);
         GenerateAttendanceSheet::dispatch($sheet);
+
+        $audit->log('sheet.generate', 'AttendanceSheet', $sheet->id, null, ['status' => 'queued'], null, $request->user());
 
         return response()->json(['message' => 'Generation queued', 'sheet_id' => $sheet->id]);
     }
@@ -66,16 +69,22 @@ class AttendanceSheetController extends Controller
         ]);
     }
 
-    public function finalize(AttendanceSheet $sheet): JsonResponse
+    public function finalize(Request $request, AttendanceSheet $sheet, AuditLogService $audit): JsonResponse
     {
+        $old = ['status' => $sheet->status];
         $sheet->update(['status' => 'finalized']);
+
+        $audit->log('sheet.finalize', 'AttendanceSheet', $sheet->id, $old, ['status' => 'finalized'], null, $request->user());
 
         return response()->json($sheet);
     }
 
-    public function reopen(AttendanceSheet $sheet): JsonResponse
+    public function reopen(Request $request, AttendanceSheet $sheet, AuditLogService $audit): JsonResponse
     {
+        $old = ['status' => $sheet->status];
         $sheet->update(['status' => 'review']);
+
+        $audit->log('sheet.reopen', 'AttendanceSheet', $sheet->id, $old, ['status' => 'review'], null, $request->user());
 
         return response()->json($sheet);
     }

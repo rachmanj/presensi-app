@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceSheet;
+use App\Services\PdfExporter;
 use App\Services\ReportExporter;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -14,6 +15,14 @@ class ReportExportController extends Controller
     {
         $path = $exporter->export($sheet);
         $filename = "attendance_{$sheet->site_code}_{$sheet->period->year}_{$sheet->period->month}.xlsx";
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportPdf(AttendanceSheet $sheet, PdfExporter $exporter): BinaryFileResponse
+    {
+        $path = $exporter->export($sheet);
+        $filename = "attendance_{$sheet->site_code}_{$sheet->period->year}_{$sheet->period->month}.pdf";
 
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }

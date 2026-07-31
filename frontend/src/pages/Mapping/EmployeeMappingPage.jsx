@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { Button, Card, Form, Input, Modal, Select, Space, Tag, message } from 'antd';
+import LeaveBalanceBadge from '../../components/shared/LeaveBalanceBadge';
 import { mappingService } from '../../services/mappingService';
 
 export default function EmployeeMappingPage() {
@@ -61,6 +62,12 @@ export default function EmployeeMappingPage() {
     { title: 'NIP', dataIndex: 'fingerprint_nip', width: 100 },
     { title: 'PIN', dataIndex: 'fingerprint_pin', width: 80 },
     { title: 'NIK', dataIndex: 'nik', width: 100 },
+    {
+      title: 'Leave Balance',
+      dataIndex: 'leave_balance',
+      width: 100,
+      render: (balance) => <LeaveBalanceBadge balance={balance} showInline />,
+    },
     { title: 'Site', dataIndex: 'site_code', width: 80 },
     {
       title: 'Active',

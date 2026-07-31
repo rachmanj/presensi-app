@@ -14,6 +14,25 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'HR Admin',
                 'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'supervisor@arka.local'],
+            [
+                'name' => 'HR Supervisor',
+                'password' => bcrypt('password'),
+                'role' => 'hr_supervisor',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'staff@arka.local'],
+            [
+                'name' => 'HR Staff',
+                'password' => bcrypt('password'),
+                'role' => 'hr_staff',
             ]
         );
 

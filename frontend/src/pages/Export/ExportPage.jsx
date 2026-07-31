@@ -66,6 +66,9 @@ export default function ExportPage() {
           <Button type="primary" size="large" onClick={handleDownload} disabled={!activeSheet}>
             Download Excel
           </Button>
+          <Button size="large" onClick={() => window.open(exportService.downloadPdfUrl(activeSheet), '_blank')} disabled={!activeSheet}>
+            Download PDF
+          </Button>
         </Space>
       </Card>
     </div>

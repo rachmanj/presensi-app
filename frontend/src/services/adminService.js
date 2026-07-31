@@ -34,7 +34,23 @@ export const adminService = {
   },
 };
 
-export async function getDashboardSummary() {
-  const { data } = await apiClient.get('/dashboard/summary');
+export async function getDashboardSummary(siteCode) {
+  const { data } = await apiClient.get('/dashboard/summary', {
+    params: siteCode ? { site_code: siteCode } : {},
+  });
+  return data;
+}
+
+export async function getDashboardOvertime(siteCode) {
+  const { data } = await apiClient.get('/dashboard/overtime', {
+    params: siteCode ? { site_code: siteCode } : {},
+  });
+  return data;
+}
+
+export async function getDashboardAttendanceTrend(siteCode) {
+  const { data } = await apiClient.get('/dashboard/attendance-trend', {
+    params: siteCode ? { site_code: siteCode } : {},
+  });
   return data;
 }

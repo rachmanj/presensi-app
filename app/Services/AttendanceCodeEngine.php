@@ -111,6 +111,7 @@ class AttendanceCodeEngine
             if ($overtimeResult['code']) {
                 $traces[] = $this->writeTrace($cell, 'overtime.'.$overtimeResult['code'], $overtimeResult['explanation'], $overtimeResult['inputs']);
                 $this->saveCellCode($cell, $overtimeResult['code']);
+                $this->applyOvertimeHours($cell, $row, $date, $scan, $row->home_site_code ?? $siteCode);
 
                 return ['auto_code' => $overtimeResult['code'], 'trace' => $traces];
             }
@@ -163,8 +164,69 @@ class AttendanceCodeEngine
         }
 
         $this->saveCellCode($cell, $finalCode);
+        $this->applyOvertimeHours($cell, $row, $date, $scan, $homeSite);
 
         return ['auto_code' => $finalCode, 'trace' => $traces];
+    }
+
+    private function applyOvertimeHours(AttendanceCell $cell, AttendanceRow $row, Carbon $date, ?FingerprintScan $scan, string $homeSite): void
+    {
+        $code = $cell->final_code ?? $cell->auto_code;
+
+        if (in_array($code, self::OVERTIME_CODES, true)) {
+            $cell->overtime_hours = $this->calculateOvertimeHours($row, $date, $scan ? [$scan] : [], $homeSite);
+        } else {
+            $cell->overtime_hours = null;
+        }
+
+        $cell->save();
+    }
+
+    public function calculateOvertimeHours(AttendanceRow $row, Carbon $date, array $scans, ?string $homeSite = null): float
+    {
+        $homeSite = $homeSite ?? $row->home_site_code ?? $row->sheet->site_code;
+        $scan = $scans[0] ?? null;
+
+        if (! $scan) {
+            return 0.0;
+        }
+
+        $checkIn = $scan instanceof FingerprintScan ? $scan->check_in : ($scan['check_in'] ?? null);
+        $checkOut = $scan instanceof FingerprintScan ? $scan->check_out : ($scan['check_out'] ?? null);
+
+        if (! $checkIn || ! $checkOut) {
+            return 0.0;
+        }
+
+        $heroActivity = $this->getHeroActivity($row->nik, $date, $row->sheet);
+        foreach ($heroActivity['overtimes'] ?? $heroActivity['overtime'] ?? [] as $ot) {
+            $otDate = $ot['date'] ?? $ot['work_date'] ?? null;
+            if ($otDate !== $date->toDateString()) {
+                continue;
+            }
+
+            $otHours = (float) ($ot['hours'] ?? $ot['duration_hours'] ?? 0);
+            if ($otHours >= 24 && str_contains(strtoupper($homeSite), 'MESS')) {
+                return 0.0;
+            }
+        }
+
+        $inTime = Carbon::parse($date->toDateString().' '.$checkIn);
+        $outTime = Carbon::parse($date->toDateString().' '.$checkOut);
+        if ($outTime->lessThan($inTime)) {
+            $outTime->addDay();
+        }
+
+        $workedHours = $inTime->diffInMinutes($outTime) / 60;
+        $normalHours = 8.0;
+
+        if ($workedHours < 7.0) {
+            return 0.0;
+        }
+
+        $overtime = max(0, $workedHours - $normalHours);
+
+        return round($overtime, 2);
     }
 
     private function resolveOverride(AttendanceCell $cell): ?string

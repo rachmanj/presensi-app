@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EmployeeMap;
 use App\Models\FingerprintScan;
 use App\Models\HeroEmployeeCache;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,25 @@ class EmployeeMapController extends Controller
             $query->where('active', $request->boolean('active'));
         }
 
-        return response()->json($query->paginate($request->integer('per_page', 50)));
+        $paginated = $query->paginate($request->integer('per_page', 50));
+        $niks = collect($paginated->items())->pluck('nik')->filter();
+        $balances = HeroEmployeeCache::whereIn('nik', $niks)->pluck('leave_balance', 'nik');
+
+        $paginated->getCollection()->transform(function ($map) use ($balances) {
+            $map->leave_balance = $balances[$map->nik] ?? null;
+
+            return $map;
+        });
+
+        return response()->json($paginated);
     }
 
-    public function store(Request $request): JsonResponse
+    public function show(EmployeeMap $employeeMap): JsonResponse
+    {
+        return response()->json($employeeMap->load('site'));
+    }
+
+    public function store(Request $request, AuditLogService $audit): JsonResponse
     {
         $data = $request->validate([
             'fingerprint_pin' => ['required', 'string', 'max:20'],
@@ -41,10 +57,12 @@ class EmployeeMapController extends Controller
 
         $map = EmployeeMap::create($data);
 
+        $audit->log('employee_map.create', 'EmployeeMap', $map->id, null, $data, null, $request->user());
+
         return response()->json($map, 201);
     }
 
-    public function update(Request $request, EmployeeMap $employeeMap): JsonResponse
+    public function update(Request $request, EmployeeMap $employeeMap, AuditLogService $audit): JsonResponse
     {
         $data = $request->validate([
             'fingerprint_pin' => ['sometimes', 'string', 'max:20'],
@@ -56,14 +74,20 @@ class EmployeeMapController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $old = $employeeMap->only(array_keys($data));
         $employeeMap->update($data);
+
+        $audit->log('employee_map.update', 'EmployeeMap', $employeeMap->id, $old, $data, null, $request->user());
 
         return response()->json($employeeMap);
     }
 
-    public function destroy(EmployeeMap $employeeMap): JsonResponse
+    public function destroy(Request $request, EmployeeMap $employeeMap, AuditLogService $audit): JsonResponse
     {
+        $old = $employeeMap->toArray();
         $employeeMap->delete();
+
+        $audit->log('employee_map.delete', 'EmployeeMap', $employeeMap->id, $old, null, null, $request->user());
 
         return response()->json(null, 204);
     }

@@ -48,6 +48,7 @@ class SyncHeroMasterData implements ShouldQueue
                     'is_active' => $employee['is_active'] ?? $employee['active'] ?? true,
                     'synced_at' => now(),
                     'raw' => $employee,
+                    'leave_balance' => $client->getLeaveBalance((string) $nik),
                 ]
             );
             $synced++;

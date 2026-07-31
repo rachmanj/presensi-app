@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\AttendancePeriod;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -43,5 +44,26 @@ class AttendancePeriodController extends Controller
     public function show(AttendancePeriod $period): JsonResponse
     {
         return response()->json($period->load('sheets'));
+    }
+
+    public function finalize(Request $request, AttendancePeriod $period, AuditLogService $audit): JsonResponse
+    {
+        $old = ['status' => $period->status];
+        $period->update(['status' => 'finalized', 'finalized_at' => now()]);
+        $period->sheets()->update(['status' => 'finalized']);
+
+        $audit->log('period.finalize', 'AttendancePeriod', $period->id, $old, ['status' => 'finalized'], null, $request->user());
+
+        return response()->json($period->fresh());
+    }
+
+    public function reopen(Request $request, AttendancePeriod $period, AuditLogService $audit): JsonResponse
+    {
+        $old = ['status' => $period->status];
+        $period->update(['status' => 'review', 'finalized_at' => null]);
+
+        $audit->log('period.reopen', 'AttendancePeriod', $period->id, $old, ['status' => 'review'], null, $request->user());
+
+        return response()->json($period->fresh());
     }
 }

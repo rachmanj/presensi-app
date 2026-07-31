@@ -40,4 +40,8 @@ return [
         'api_key' => env('HERO_API_KEY'),
     ],
 
+    'fingerprint' => [
+        'webhook_key' => env('FINGERPRINT_WEBHOOK_KEY'),
+    ],
+
 ];
