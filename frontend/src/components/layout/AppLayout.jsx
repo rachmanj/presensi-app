@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { LogoutOutlined } from '@ant-design/icons';
+import {
+  UserOutlined,
+  LogoutOutlined,
+  KeyOutlined,
+  BulbOutlined,
+  BulbFilled,
+} from '@ant-design/icons';
 import { ProLayout } from '@ant-design/pro-components';
-import { Dropdown, message } from 'antd';
-import { logout } from '../../services/authService';
+import { Dropdown, Modal, Form, Input, App } from 'antd';
+import { logout, changePassword } from '../../services/authService';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 
 const ALL_MENU_ROUTES = [
   { path: '/dashboard', name: 'Dashboard', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
@@ -28,18 +35,21 @@ const ALL_MENU_ROUTES = [
   },
 ];
 
+const ROLE_LABELS = {
+  admin: 'Admin',
+  hr_supervisor: 'Supervisor',
+  hr_staff: 'Staff',
+};
+
 function filterMenuByRole(routes, role) {
   return routes
     .filter((item) => item.roles?.includes(role))
     .map((item) => {
       if (item.children) {
         const children = filterMenuByRole(item.children, role);
-
         if (children.length === 0) return null;
-
         return { ...item, children };
       }
-
       return item;
     })
     .filter(Boolean);
@@ -47,8 +57,13 @@ function filterMenuByRole(routes, role) {
 
 export default function AppLayout() {
   const navigate = useNavigate();
-  const { data: user } = useAuth();
+  const { data: user, refetch } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordForm] = Form.useForm();
+  const { message } = App.useApp();
 
   const menuRoutes = filterMenuByRole(ALL_MENU_ROUTES, user?.role || 'hr_staff');
 
@@ -62,37 +77,134 @@ export default function AppLayout() {
     }
   };
 
+  const handleChangePassword = async (values) => {
+    setChangingPassword(true);
+    try {
+      await changePassword(values);
+      message.success('Password changed successfully');
+      setPasswordModalOpen(false);
+      passwordForm.resetFields();
+    } catch (err) {
+      message.error(err?.response?.data?.message || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const userMenuItems = [
+    {
+      key: 'user-info',
+      label: (
+        <div style={{ padding: '4px 0' }}>
+          <div style={{ fontWeight: 600 }}>{user?.name || 'User'}</div>
+          <div style={{ fontSize: 12, opacity: 0.65 }}>
+            {ROLE_LABELS[user?.role] || user?.role}
+          </div>
+        </div>
+      ),
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
+      key: 'change-password',
+      icon: <KeyOutlined />,
+      label: 'Change Password',
+      onClick: () => setPasswordModalOpen(true),
+    },
+    {
+      key: 'theme',
+      icon: isDark ? <BulbFilled /> : <BulbOutlined />,
+      label: isDark ? 'Light Mode' : 'Dark Mode',
+      onClick: toggleTheme,
+    },
+    { type: 'divider' },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Logout',
+      danger: true,
+      onClick: handleLogout,
+    },
+  ];
+
   return (
-    <ProLayout
-      title="ARKA Presensi"
-      logo={false}
-      collapsed={collapsed}
-      onCollapse={setCollapsed}
-      route={{ routes: menuRoutes }}
-      menuItemRender={(item, dom) => (
-        <Link to={item.path || '/'}>{dom}</Link>
-      )}
-      avatarProps={{
-        title: user?.name || 'User',
-        render: (_, dom) => (
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: 'logout',
-                  icon: <LogoutOutlined />,
-                  label: 'Logout',
-                  onClick: handleLogout,
-                },
-              ],
-            }}
+    <>
+      <ProLayout
+        title="ARKA Presensi"
+        logo={false}
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        route={{ routes: menuRoutes }}
+        menuItemRender={(item, dom) => (
+          <Link to={item.path || '/'}>{dom}</Link>
+        )}
+        avatarProps={{
+          src: null,
+          icon: <UserOutlined />,
+          title: user?.name || 'User',
+          render: (_, dom) => (
+            <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+              {dom}
+            </Dropdown>
+          ),
+        }}
+      >
+        <Outlet />
+      </ProLayout>
+
+      <Modal
+        title="Change Password"
+        open={passwordModalOpen}
+        onCancel={() => {
+          setPasswordModalOpen(false);
+          passwordForm.resetFields();
+        }}
+        onOk={() => passwordForm.submit()}
+        confirmLoading={changingPassword}
+        destroyOnClose
+      >
+        <Form
+          form={passwordForm}
+          layout="vertical"
+          onFinish={handleChangePassword}
+        >
+          <Form.Item
+            name="current_password"
+            label="Current Password"
+            rules={[{ required: true, message: 'Please enter current password' }]}
           >
-            {dom}
-          </Dropdown>
-        ),
-      }}
-    >
-      <Outlet />
-    </ProLayout>
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            label="New Password"
+            rules={[
+              { required: true, message: 'Please enter new password' },
+              { min: 8, message: 'Minimum 8 characters' },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="password_confirmation"
+            label="Confirm New Password"
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Please confirm new password' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Passwords do not match'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   );
 }

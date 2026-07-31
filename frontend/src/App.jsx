@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App as AntApp, theme } from 'antd';
+import enUS from 'antd/locale/en_US';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider, useTheme } from './hooks/useTheme';
 import AppLayout from './components/layout/AppLayout';
 import RequireAuth from './components/layout/RequireAuth';
 import RequireRole from './components/layout/RequireRole';
@@ -21,16 +23,29 @@ import SiteDaytypeCodePage from './pages/Admin/SiteDaytypeCodePage';
 import HolidayCalendarPage from './pages/Admin/HolidayCalendarPage';
 import ReportTemplatePage from './pages/Admin/ReportTemplatePage';
 
+const { darkAlgorithm, defaultAlgorithm } = theme;
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { refetchOnWindowFocus: false },
   },
 });
 
-export default function App() {
+function ThemedApp() {
+  const { isDark } = useTheme();
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ConfigProvider>
+    <ConfigProvider
+      theme={{
+        algorithm: isDark ? darkAlgorithm : defaultAlgorithm,
+        token: {
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          borderRadius: 6,
+        },
+      }}
+      locale={enUS}
+    >
+      <AntApp>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -106,7 +121,17 @@ export default function App() {
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
-      </ConfigProvider>
+      </AntApp>
+    </ConfigProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

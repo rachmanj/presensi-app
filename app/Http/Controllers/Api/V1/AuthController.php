@@ -50,4 +50,27 @@ class AuthController extends Controller
     {
         return response()->json(['user' => $request->user()]);
     }
+
+    public function changePassword(Request $request, AuditLogService $audit): JsonResponse
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = $request->user();
+
+        if (!\Illuminate\Support\Facades\Hash::check($validated['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Current password is incorrect.'],
+            ]);
+        }
+
+        $user->password = bcrypt($validated['password']);
+        $user->save();
+
+        $audit->log('user.password_changed', 'User', $user->id, null, null, null, $user);
+
+        return response()->json(['message' => 'Password changed successfully']);
+    }
 }

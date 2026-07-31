@@ -14,3 +14,12 @@ export async function getCurrentUser() {
   const { data } = await apiClient.get('/auth/me');
   return data.user;
 }
+
+export async function changePassword({ current_password, password, password_confirmation }) {
+  const { data } = await apiClient.put('/auth/password', {
+    current_password,
+    password,
+    password_confirmation,
+  });
+  return data;
+}
