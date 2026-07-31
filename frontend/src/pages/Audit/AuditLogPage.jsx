@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { DatePicker, Select } from 'antd';
 import { auditService } from '../../services/auditService';
+import { formatDisplayDateTime } from '../../utils/dateFormat';
 
 function formatDate(d) {
   if (!d) return undefined;
@@ -86,7 +87,7 @@ export default function AuditLogPage() {
           />,
         ]}
         columns={[
-          { title: 'Time', dataIndex: 'created_at', width: 170 },
+          { title: 'Time', dataIndex: 'created_at', width: 170, render: (v) => formatDisplayDateTime(v) },
           { title: 'User', dataIndex: ['user', 'name'], width: 140 },
           { title: 'Action', dataIndex: 'action', width: 160 },
           { title: 'Entity', dataIndex: 'entity_type', width: 140 },

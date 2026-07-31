@@ -3,6 +3,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormDatePicker, ProFormDigit, ProFormSelect, ProFormText, ProTable } from '@ant-design/pro-components';
 import { Button, message } from 'antd';
 import { adminService } from '../../services/adminService';
+import { formatDisplayDate } from '../../utils/dateFormat';
 
 export default function HolidayCalendarPage() {
   const actionRef = useRef();
@@ -10,7 +11,7 @@ export default function HolidayCalendarPage() {
   const [year, setYear] = useState(2026);
 
   const columns = [
-    { title: 'Date', dataIndex: 'date', width: 120 },
+    { title: 'Date', dataIndex: 'date', width: 120, render: (v) => formatDisplayDate(v) },
     { title: 'Type', dataIndex: 'type', width: 140 },
     { title: 'Description', dataIndex: 'description' },
     { title: 'Year', dataIndex: 'year', width: 80 },
