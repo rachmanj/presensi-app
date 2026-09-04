@@ -9,6 +9,7 @@ import { useAttendanceGrid } from '../../hooks/useAttendanceGrid';
 import CodeBadge from '../../components/shared/CodeBadge';
 import LeaveBalanceBadge from '../../components/shared/LeaveBalanceBadge';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 import CellEditModal from './CellEditModal';
 
 const CAN_OVERRIDE = ['hr_supervisor', 'admin'];
@@ -19,9 +20,16 @@ const DAY_TYPE_BG = {
   holiday: '#f5f5f5',
 };
 
+const DAY_TYPE_BG_DARK = {
+  saturday: 'rgba(250,173,20,0.22)',
+  sunday: 'rgba(255,77,79,0.22)',
+  holiday: 'rgba(255,255,255,0.10)',
+};
+
 export default function SheetReviewPage() {
   const { sheetId } = useParams();
   const [editCell, setEditCell] = useState(null);
+  const { isDark } = useTheme();
   const { data: user } = useAuth();
   const canOverride = CAN_OVERRIDE.includes(user?.role);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -85,7 +93,8 @@ export default function SheetReviewPage() {
       width: 52,
       onHeaderCell: () => {
         const sampleCell = rows[0]?.cells?.[day];
-        const bg = DAY_TYPE_BG[sampleCell?.day_type];
+        const bgMap = isDark ? DAY_TYPE_BG_DARK : DAY_TYPE_BG;
+        const bg = bgMap[sampleCell?.day_type];
         return bg ? { style: { background: bg } } : {};
       },
       render: (_, record) => {
@@ -122,7 +131,7 @@ export default function SheetReviewPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <h3 style={{ margin: 0, flex: 1 }}>
           Tinjauan: {sheetInfo?.site_code} - {sheetInfo?.period?.label}
-          <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
+          <span style={{ marginLeft: 12, fontSize: 14, color: isDark ? 'rgba(255,255,255,0.45)' : '#666' }}>
             ({rows.length} karyawan, {daysInMonth} hari)
           </span>
         </h3>
