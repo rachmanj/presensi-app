@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { Button, Form, InputNumber, Modal, Select, Space, Tag, message } from 'antd';
 import { Link } from 'react-router-dom';
+import ErrorState from '../../components/shared/ErrorState';
 import { attendanceService } from '../../services/attendanceService';
 
 const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -12,7 +13,7 @@ export default function PeriodListPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm();
 
-  const { data: periods, isLoading } = useQuery({
+  const { data: periods, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['periods'],
     queryFn: attendanceService.periods.list,
   });
@@ -54,14 +55,22 @@ export default function PeriodListPage() {
       <Space style={{ marginBottom: 16 }}>
         <Button type="primary" onClick={() => setCreateOpen(true)}>New Period</Button>
       </Space>
-      <ProTable
-        columns={columns}
-        dataSource={periods || []}
-        loading={isLoading}
-        rowKey="id"
-        search={false}
-        headerTitle="Attendance Periods"
-      />
+      {isError ? (
+        <ErrorState
+          description={error?.message || 'Daftar periode tidak dapat dimuat.'}
+          onRetry={refetch}
+        />
+      ) : (
+        <ProTable
+          columns={columns}
+          dataSource={periods || []}
+          loading={isLoading}
+          rowKey="id"
+          search={false}
+          headerTitle="Attendance Periods"
+          locale={{ emptyText: 'Belum ada periode. Buat periode baru untuk mulai.' }}
+        />
+      )}
 
       <Modal
         title="Create Period"

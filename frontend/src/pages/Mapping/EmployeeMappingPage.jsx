@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { Button, Card, Form, Input, Modal, Select, Space, Tag, message } from 'antd';
+import ErrorState from '../../components/shared/ErrorState';
 import LeaveBalanceBadge from '../../components/shared/LeaveBalanceBadge';
 import { mappingService } from '../../services/mappingService';
 
@@ -11,7 +12,7 @@ export default function EmployeeMappingPage() {
   const [editing, setEditing] = useState(null);
   const [form] = Form.useForm();
 
-  const { data: mappings, isLoading } = useQuery({
+  const { data: mappings, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['employee-maps'],
     queryFn: () => mappingService.list({ per_page: 100 }),
   });
@@ -97,15 +98,23 @@ export default function EmployeeMappingPage() {
         </Button>
       </Space>
 
-      <ProTable
-        columns={columns}
-        dataSource={list}
-        loading={isLoading}
-        rowKey="id"
-        search={false}
-        pagination={{ pageSize: 20 }}
-        headerTitle="Employee Mappings (NIP → NIK)"
-      />
+      {isError ? (
+        <ErrorState
+          description={error?.message || 'Daftar pemetaan tidak dapat dimuat.'}
+          onRetry={refetch}
+        />
+      ) : (
+        <ProTable
+          columns={columns}
+          dataSource={list}
+          loading={isLoading}
+          rowKey="id"
+          search={false}
+          pagination={{ pageSize: 20 }}
+          headerTitle="Employee Mappings (NIP → NIK)"
+          locale={{ emptyText: 'Belum ada pemetaan NIP. Tambahkan pemetaan atau pakai saran otomatis.' }}
+        />
+      )}
 
       <Card title="Unmatched Queue" style={{ marginTop: 24 }}>
         <ProTable

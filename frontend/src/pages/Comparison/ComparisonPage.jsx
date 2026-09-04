@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Card, Input, Select, Space, Table, Typography } from 'antd';
 import { Line } from '@ant-design/charts';
+import ErrorState from '../../components/shared/ErrorState';
 import { attendanceService } from '../../services/attendanceService';
 import { comparisonService } from '../../services/comparisonService';
 import { adminService } from '../../services/adminService';
@@ -31,7 +32,13 @@ export default function ComparisonPage() {
     queryFn: adminService.sites.list,
   });
 
-  const { data: siteComparison, isLoading: siteLoading } = useQuery({
+  const {
+    data: siteComparison,
+    isLoading: siteLoading,
+    isError: siteError,
+    error: siteErrorObj,
+    refetch: refetchSite,
+  } = useQuery({
     queryKey: ['comparison-site', siteCode, periodIds],
     queryFn: () => comparisonService.site(siteCode, periodIds),
     enabled: periodIds.length >= 2,
@@ -79,6 +86,63 @@ export default function ComparisonPage() {
     meta: { percentage: { min: 0, max: 100 } },
   };
 
+  const comparisonEmptyText = periodIds.length < 2
+    ? 'Pilih minimal 2 periode untuk membandingkan data site.'
+    : 'Belum ada data perbandingan untuk site dan periode yang dipilih.';
+
+  const renderSiteComparison = () => {
+    if (periodIds.length < 2) {
+      return (
+        <Table
+          size="small"
+          dataSource={[]}
+          rowKey="key"
+          pagination={false}
+          locale={{ emptyText: comparisonEmptyText }}
+          columns={[
+            { title: 'Periode', dataIndex: 'period' },
+            { title: 'Kehadiran %', dataIndex: 'attendance_pct' },
+            { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
+            { title: 'Cuti', dataIndex: 'leave_count' },
+            { title: 'Absen', dataIndex: 'absent_count' },
+            { title: 'Karyawan', dataIndex: 'employees' },
+          ]}
+        />
+      );
+    }
+
+    if (siteError) {
+      return (
+        <ErrorState
+          description={siteErrorObj?.message || 'Data perbandingan site tidak dapat dimuat.'}
+          onRetry={refetchSite}
+        />
+      );
+    }
+
+    return (
+      <Table
+        size="small"
+        dataSource={gridData}
+        rowKey="key"
+        pagination={false}
+        locale={{ emptyText: comparisonEmptyText }}
+        columns={[
+          { title: 'Periode', dataIndex: 'period' },
+          {
+            title: 'Kehadiran %',
+            dataIndex: 'attendance_pct',
+            render: (v) => <span style={{ color: pctColor(v), fontWeight: 600 }}>{v}%</span>,
+          },
+          { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
+          { title: 'Cuti', dataIndex: 'leave_count' },
+          { title: 'Absen', dataIndex: 'absent_count' },
+          { title: 'Karyawan', dataIndex: 'employees' },
+        ]}
+      />
+    );
+  };
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>Perbandingan Multi-Bulan</Title>
@@ -109,25 +173,8 @@ export default function ComparisonPage() {
         </Button>
       </Space>
 
-      <Card title={`Perbandingan Site: ${siteCode}`} loading={siteLoading}>
-        <Table
-          size="small"
-          dataSource={gridData}
-          rowKey="key"
-          pagination={false}
-          columns={[
-            { title: 'Periode', dataIndex: 'period' },
-            {
-              title: 'Kehadiran %',
-              dataIndex: 'attendance_pct',
-              render: (v) => <span style={{ color: pctColor(v), fontWeight: 600 }}>{v}%</span>,
-            },
-            { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
-            { title: 'Cuti', dataIndex: 'leave_count' },
-            { title: 'Absen', dataIndex: 'absent_count' },
-            { title: 'Karyawan', dataIndex: 'employees' },
-          ]}
-        />
+      <Card title={`Perbandingan Site: ${siteCode}`} loading={siteLoading && periodIds.length >= 2 && !siteError}>
+        {renderSiteComparison()}
       </Card>
 
       {employeeComparison && (

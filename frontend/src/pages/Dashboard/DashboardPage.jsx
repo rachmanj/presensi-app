@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, Col, Row, Select, Statistic, Table, Typography } from 'antd';
 import { Column } from '@ant-design/charts';
+import ErrorState from '../../components/shared/ErrorState';
 import {
   getDashboardAttendanceTrend,
   getDashboardOvertime,
@@ -19,17 +20,35 @@ export default function DashboardPage() {
     queryFn: adminService.sites.list,
   });
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    isError: summaryError,
+    error: summaryErrorObj,
+    refetch: refetchSummary,
+  } = useQuery({
     queryKey: ['dashboard', 'summary', siteCode],
     queryFn: () => getDashboardSummary(siteCode),
   });
 
-  const { data: trend, isLoading: trendLoading } = useQuery({
+  const {
+    data: trend,
+    isLoading: trendLoading,
+    isError: trendError,
+    error: trendErrorObj,
+    refetch: refetchTrend,
+  } = useQuery({
     queryKey: ['dashboard', 'trend', siteCode],
     queryFn: () => getDashboardAttendanceTrend(siteCode),
   });
 
-  const { data: overtime, isLoading: overtimeLoading } = useQuery({
+  const {
+    data: overtime,
+    isLoading: overtimeLoading,
+    isError: overtimeError,
+    error: overtimeErrorObj,
+    refetch: refetchOvertime,
+  } = useQuery({
     queryKey: ['dashboard', 'overtime', siteCode],
     queryFn: () => getDashboardOvertime(siteCode),
   });
@@ -62,49 +81,76 @@ export default function DashboardPage() {
         />
       </Row>
 
-      <Row gutter={16}>
-        <Col span={6}>
-          <Card loading={summaryLoading}>
-            <Statistic title="Hadir" value={summary?.present ?? 0} valueStyle={{ color: '#3f8600' }} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card loading={summaryLoading}>
-            <Statistic title="Terlambat" value={summary?.late ?? 0} valueStyle={{ color: '#faad14' }} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card loading={summaryLoading}>
-            <Statistic title="Cuti" value={summary?.on_leave ?? 0} valueStyle={{ color: '#1890ff' }} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card loading={summaryLoading}>
-            <Statistic title="Absen" value={summary?.absent ?? 0} valueStyle={{ color: '#cf1322' }} />
-          </Card>
-        </Col>
-      </Row>
+      {summaryError ? (
+        <Card>
+          <ErrorState
+            description={summaryErrorObj?.message || 'Ringkasan kehadiran tidak dapat dimuat.'}
+            onRetry={refetchSummary}
+          />
+        </Card>
+      ) : (
+        <Row gutter={[16, 16]}>
+          <Col xs={12} md={6} lg={6} xl={6}>
+            <Card loading={summaryLoading}>
+              <Statistic title="Hadir" value={summary?.present ?? 0} valueStyle={{ color: '#3f8600' }} />
+            </Card>
+          </Col>
+          <Col xs={12} md={6} lg={6} xl={6}>
+            <Card loading={summaryLoading}>
+              <Statistic title="Terlambat" value={summary?.late ?? 0} valueStyle={{ color: '#faad14' }} />
+            </Card>
+          </Col>
+          <Col xs={12} md={6} lg={6} xl={6}>
+            <Card loading={summaryLoading}>
+              <Statistic title="Cuti" value={summary?.on_leave ?? 0} valueStyle={{ color: '#1890ff' }} />
+            </Card>
+          </Col>
+          <Col xs={12} md={6} lg={6} xl={6}>
+            <Card loading={summaryLoading} style={{ borderLeft: '4px solid #cf1322' }}>
+              <Statistic title="Absen" value={summary?.absent ?? 0} valueStyle={{ color: '#cf1322' }} />
+            </Card>
+          </Col>
+        </Row>
+      )}
 
-      <Card title="Kehadiran 7 Hari Terakhir" style={{ marginTop: 24 }} loading={trendLoading}>
-        <Column {...trendConfig} />
+      <Card
+        title="Kehadiran 7 Hari Terakhir"
+        style={{ marginTop: 24 }}
+        loading={trendLoading && !trendError}
+      >
+        {trendError ? (
+          <ErrorState
+            description={trendErrorObj?.message || 'Grafik tren kehadiran tidak dapat dimuat.'}
+            onRetry={refetchTrend}
+          />
+        ) : (
+          <Column {...trendConfig} />
+        )}
       </Card>
 
       <Card
         title={`Lembur Bulanan: ${overtime?.period?.label || 'Periode aktif'}`}
         style={{ marginTop: 24 }}
-        loading={overtimeLoading}
+        loading={overtimeLoading && !overtimeError}
       >
-        <Table
-          size="small"
-          rowKey="site_code"
-          pagination={false}
-          dataSource={overtime?.sites || []}
-          columns={[
-            { title: 'Site', dataIndex: 'site_code' },
-            { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
-            { title: 'Hari Lembur', dataIndex: 'overtime_days' },
-          ]}
-        />
+        {overtimeError ? (
+          <ErrorState
+            description={overtimeErrorObj?.message || 'Data lembur tidak dapat dimuat.'}
+            onRetry={refetchOvertime}
+          />
+        ) : (
+          <Table
+            size="small"
+            rowKey="site_code"
+            pagination={false}
+            dataSource={overtime?.sites || []}
+            columns={[
+              { title: 'Site', dataIndex: 'site_code' },
+              { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
+              { title: 'Hari Lembur', dataIndex: 'overtime_days' },
+            ]}
+          />
+        )}
       </Card>
     </div>
   );

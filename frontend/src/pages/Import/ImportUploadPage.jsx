@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Upload, Button, Card, Progress, Alert, Descriptions } from 'antd';
+import { useQuery } from '@tanstack/react-query';
+import { Upload, Button, Card, Progress, Alert, Descriptions, Spin } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
+import ErrorState from '../../components/shared/ErrorState';
+import { attendanceService } from '../../services/attendanceService';
 import { importService } from '../../services/importService';
 
 const { Dragger } = Upload;
@@ -14,6 +17,17 @@ export default function ImportUploadPage() {
   const [progress, setProgress] = useState(0);
   const [importRecord, setImportRecord] = useState(null);
   const [parseStatus, setParseStatus] = useState(null);
+
+  const {
+    isLoading: sheetLoading,
+    isError: sheetError,
+    error: sheetErrorObj,
+    refetch: refetchSheet,
+  } = useQuery({
+    queryKey: ['sheet', sheetId],
+    queryFn: () => attendanceService.sheets.show(sheetId),
+    enabled: !!sheetId,
+  });
 
   useEffect(() => {
     if (!importRecord?.id) return undefined;
@@ -48,6 +62,27 @@ export default function ImportUploadPage() {
     return (
       <div style={{ padding: 24 }}>
         <Alert type="warning" message="No sheet selected. Go to Import list and select a sheet first." />
+      </div>
+    );
+  }
+
+  if (sheetLoading) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Spin />
+      </div>
+    );
+  }
+
+  if (sheetError) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Card title="Upload Fingerprint File">
+          <ErrorState
+            description={sheetErrorObj?.message || 'Data sheet tidak dapat dimuat.'}
+            onRetry={refetchSheet}
+          />
+        </Card>
       </div>
     );
   }

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ReloadOutlined } from '@ant-design/icons';
-import { Button, Spin, Table } from 'antd';
+import { Button, Empty, Spin, Table } from 'antd';
+import ErrorState from '../../components/shared/ErrorState';
 import { attendanceService } from '../../services/attendanceService';
 import { useAttendanceGrid } from '../../hooks/useAttendanceGrid';
 import CodeBadge from '../../components/shared/CodeBadge';
@@ -25,7 +26,7 @@ export default function SheetReviewPage() {
   const canOverride = CAN_OVERRIDE.includes(user?.role);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data, isLoading, refetch: refetchGrid, updateCell } = useAttendanceGrid(sheetId, {
+  const { data, isLoading, isError, error, refetch: refetchGrid, updateCell } = useAttendanceGrid(sheetId, {
     refetchInterval: (query) => {
       const rows = query.state.data?.rows ?? [];
       return rows.length === 0 ? 5000 : false;
@@ -48,8 +49,20 @@ export default function SheetReviewPage() {
 
   if (isLoading) return <Spin style={{ display: 'block', margin: 48 }} />;
 
+  if (isError) {
+    return (
+      <div style={{ padding: 24 }}>
+        <ErrorState
+          description={error?.message || 'Grid absensi tidak dapat dimuat.'}
+          onRetry={refetchGrid}
+        />
+      </div>
+    );
+  }
+
   const daysInMonth = data?.days_in_month || 30;
   const rows = data?.rows || [];
+  const isDraftEmpty = rows.length === 0 && sheetInfo?.status === 'draft';
 
   const frozenCols = [
     { title: 'No', dataIndex: 'no', fixed: 'left', width: 50 },
@@ -121,15 +134,19 @@ export default function SheetReviewPage() {
           Refresh
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={rows}
-        rowKey="id"
-        scroll={{ x: 400 + daysInMonth * 52 + summaryCols.length * 60 }}
-        size="small"
-        pagination={{ pageSize: 50 }}
-        bordered
-      />
+      {isDraftEmpty ? (
+        <Empty description="Sheet belum di-generate. Buka halaman detail sheet lalu klik Generate." />
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={rows}
+          rowKey="id"
+          scroll={{ x: 400 + daysInMonth * 52 + summaryCols.length * 60 }}
+          size="small"
+          pagination={{ pageSize: 50 }}
+          bordered
+        />
+      )}
       {editCell && (
         <CellEditModal
           cell={editCell}

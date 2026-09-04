@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { Button, Select, Space, Tag } from 'antd';
 import { Link } from 'react-router-dom';
+import ErrorState from '../../components/shared/ErrorState';
 import { attendanceService } from '../../services/attendanceService';
 import { importService } from '../../services/importService';
 
@@ -29,7 +30,7 @@ export default function ImportListPage() {
 
   const activeSheetId = sheetId || sheets?.[0]?.id;
 
-  const { data: imports, isLoading } = useQuery({
+  const { data: imports, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['imports', activeSheetId],
     queryFn: () => importService.list(activeSheetId),
     enabled: !!activeSheetId,
@@ -81,15 +82,23 @@ export default function ImportListPage() {
           <Button type="primary">Upload New File</Button>
         </Link>
       </Space>
-      <ProTable
-        columns={columns}
-        dataSource={imports || []}
-        loading={isLoading}
-        rowKey="id"
-        search={false}
-        pagination={{ pageSize: 20 }}
-        headerTitle="Fingerprint Imports"
-      />
+      {isError ? (
+        <ErrorState
+          description={error?.message || 'Daftar import tidak dapat dimuat.'}
+          onRetry={refetch}
+        />
+      ) : (
+        <ProTable
+          columns={columns}
+          dataSource={imports || []}
+          loading={isLoading}
+          rowKey="id"
+          search={false}
+          pagination={{ pageSize: 20 }}
+          headerTitle="Fingerprint Imports"
+          locale={{ emptyText: 'Belum ada import. Unggah file fingerprint untuk memulai.' }}
+        />
+      )}
     </div>
   );
 }

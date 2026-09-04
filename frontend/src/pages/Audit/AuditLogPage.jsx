@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { DatePicker, Select } from 'antd';
+import ErrorState from '../../components/shared/ErrorState';
 import { auditService } from '../../services/auditService';
 import { formatDisplayDateTime } from '../../utils/dateFormat';
 
@@ -40,7 +41,7 @@ const ENTITY_OPTIONS = [
 export default function AuditLogPage() {
   const [filters, setFilters] = useState({});
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['audit-logs', filters],
     queryFn: () => auditService.list(filters),
   });
@@ -49,6 +50,12 @@ export default function AuditLogPage() {
 
   return (
     <div style={{ padding: 24 }}>
+      {isError ? (
+        <ErrorState
+          description={error?.message || 'Log audit tidak dapat dimuat.'}
+          onRetry={refetch}
+        />
+      ) : (
       <ProTable
         headerTitle="Audit Log"
         loading={isLoading}
@@ -57,6 +64,7 @@ export default function AuditLogPage() {
         search={false}
         pagination={{ total: data?.total, pageSize: filters.per_page || 25 }}
         onChange={(pagination) => setFilters((f) => ({ ...f, page: pagination.current, per_page: pagination.pageSize }))}
+        locale={{ emptyText: 'Belum ada aktivitas tercatat.' }}
         toolBarRender={() => [
           <Select
             key="action"
@@ -95,6 +103,7 @@ export default function AuditLogPage() {
           { title: 'Note', dataIndex: 'note', ellipsis: true },
         ]}
       />
+      )}
     </div>
   );
 }
