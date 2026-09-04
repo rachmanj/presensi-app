@@ -41,9 +41,10 @@ class DashboardService
         $onLeaveCount = 0;
         $onLotCount = 0;
         $leaveNiks = collect();
+        $activityByNik = [];
 
         foreach ($employees as $emp) {
-            $activity = $this->getEmployeeActivity($emp->nik, $today);
+            $activity = $activityByNik[$emp->nik] ??= $this->getEmployeeActivity($emp->nik, $today);
             if ($this->isOnLeave($activity, $today)) {
                 $onLeaveCount++;
                 $leaveNiks->push($emp->nik);
@@ -53,14 +54,14 @@ class DashboardService
             }
         }
 
-        $absentCount = $employees->filter(function ($emp) {
+        $absentCount = $employees->filter(function ($emp) use ($presentNiks) {
             return ! $presentNiks->contains($emp->nik);
-        })->filter(function ($emp) use ($leaveNiks, $today) {
+        })->filter(function ($emp) use ($leaveNiks, $activityByNik) {
             if ($leaveNiks->contains($emp->nik)) {
                 return false;
             }
 
-            $activity = $this->getEmployeeActivity($emp->nik, $today);
+            $activity = $activityByNik[$emp->nik] ?? [];
 
             return ! $this->isOnLot($activity, $today);
         })->count();
@@ -177,12 +178,16 @@ class DashboardService
 
     private function getEmployeeActivity(string $nik, Carbon $date): array
     {
-        $cached = HeroEmployeeCache::where('nik', $nik)->first();
-        if ($cached?->raw && isset($cached->raw['activity'])) {
-            return $cached->raw['activity'];
-        }
+        try {
+            $cached = HeroEmployeeCache::where('nik', $nik)->first();
+            if ($cached?->raw && isset($cached->raw['activity'])) {
+                return $cached->raw['activity'];
+            }
 
-        return $this->heroApiClient->getActivity($nik, $date->year, $date->month);
+            return $this->heroApiClient->getActivity($nik, $date->year, $date->month);
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     private function isOnLeave(array $activity, Carbon $date): bool
