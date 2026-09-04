@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { attendanceService } from '../services/attendanceService';
 
-export function useAttendanceGrid(sheetId) {
+export function useAttendanceGrid(sheetId, options = {}) {
   const queryClient = useQueryClient();
 
   const gridQuery = useQuery({
     queryKey: ['attendance-grid', sheetId],
     queryFn: () => attendanceService.sheets.grid(sheetId),
     enabled: !!sheetId,
+    ...options,
   });
 
   const updateCell = useMutation({

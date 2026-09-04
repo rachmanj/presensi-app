@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Spin, Table } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
+import { Button, Spin, Table } from 'antd';
 import { attendanceService } from '../../services/attendanceService';
 import { useAttendanceGrid } from '../../hooks/useAttendanceGrid';
 import CodeBadge from '../../components/shared/CodeBadge';
@@ -22,12 +23,28 @@ export default function SheetReviewPage() {
   const [editCell, setEditCell] = useState(null);
   const { data: user } = useAuth();
   const canOverride = CAN_OVERRIDE.includes(user?.role);
-  const { data, isLoading, updateCell } = useAttendanceGrid(sheetId);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: sheetInfo } = useQuery({
+  const { data, isLoading, refetch: refetchGrid, updateCell } = useAttendanceGrid(sheetId, {
+    refetchInterval: (query) => {
+      const rows = query.state.data?.rows ?? [];
+      return rows.length === 0 ? 5000 : false;
+    },
+  });
+
+  const { data: sheetInfo, refetch: refetchSheetInfo } = useQuery({
     queryKey: ['sheet', sheetId],
     queryFn: () => attendanceService.sheets.show(sheetId),
   });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refetchGrid(), refetchSheetInfo()]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   if (isLoading) return <Spin style={{ display: 'block', margin: 48 }} />;
 
@@ -89,12 +106,21 @@ export default function SheetReviewPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h3>
-        Review: {sheetInfo?.site_code} — {sheetInfo?.period?.label}
-        <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
-          ({rows.length} employees, {daysInMonth} days)
-        </span>
-      </h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <h3 style={{ margin: 0, flex: 1 }}>
+          Review: {sheetInfo?.site_code} — {sheetInfo?.period?.label}
+          <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
+            ({rows.length} employees, {daysInMonth} days)
+          </span>
+        </h3>
+        <Button
+          icon={<ReloadOutlined />}
+          loading={isRefreshing}
+          onClick={handleRefresh}
+        >
+          Refresh
+        </Button>
+      </div>
       <Table
         columns={columns}
         dataSource={rows}
