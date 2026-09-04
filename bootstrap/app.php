@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->job(new SyncHeroMasterData)->hourly();
+        $schedule->job(new SyncHeroMasterData)->twiceDaily(2, 14);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
