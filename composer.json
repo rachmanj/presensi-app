@@ -11,7 +11,7 @@
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "openspout/openspout": "^5.8",
+        "openspout/openspout": "^5.3",
         "phpoffice/phpspreadsheet": "^5.9"
     },
     "require-dev": {
@@ -65,6 +65,9 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+        "platform": {
+            "php": "8.3.30"
+        },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
