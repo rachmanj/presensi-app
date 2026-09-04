@@ -13,10 +13,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(values.email, values.password);
-      message.success('Login successful');
+      message.success('Login berhasil');
       navigate('/dashboard');
     } catch {
-      message.error('Invalid email or password');
+      message.error('Email atau kata sandi tidak valid');
     } finally {
       setLoading(false);
     }
@@ -37,10 +37,18 @@ export default function LoginPage() {
           onFinish={handleSubmit}
           loading={loading}
           containerStyle={{ height: 'auto', overflow: 'hidden', padding: 0 }}
-          submitter={{ searchConfig: { submitText: 'Login' } }}
+          submitter={{ searchConfig: { submitText: 'Masuk' } }}
         >
-          <ProFormText name="email" label="Email" rules={[{ required: true, type: 'email' }]} />
-          <ProFormText.Password name="password" label="Password" rules={[{ required: true }]} />
+          <ProFormText
+            name="email"
+            label="Email"
+            rules={[{ required: true, type: 'email', message: 'Masukkan email' }]}
+          />
+          <ProFormText.Password
+            name="password"
+            label="Kata Sandi"
+            rules={[{ required: true, message: 'Masukkan kata sandi' }]}
+          />
         </LoginForm>
       </Card>
     </div>

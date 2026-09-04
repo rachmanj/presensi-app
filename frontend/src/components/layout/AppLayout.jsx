@@ -14,23 +14,23 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 
 const ALL_MENU_ROUTES = [
-  { path: '/dashboard', name: 'Dashboard', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/import', name: 'Import', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/mapping', name: 'Mapping', roles: ['hr_supervisor', 'admin'] },
-  { path: '/attendance', name: 'Attendance', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/export', name: 'Export', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/comparison', name: 'Comparison', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/audit', name: 'Audit Log', roles: ['admin'] },
+  { path: '/dashboard', name: 'Dasbor', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/import', name: 'Impor', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/mapping', name: 'Pemetaan', roles: ['hr_supervisor', 'admin'] },
+  { path: '/attendance', name: 'Kehadiran', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/export', name: 'Ekspor', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/comparison', name: 'Perbandingan', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/audit', name: 'Log Audit', roles: ['admin'] },
   {
     path: '/admin',
     name: 'Admin',
     roles: ['hr_supervisor', 'admin'],
     children: [
-      { path: '/admin/sites', name: 'Sites', roles: ['admin'] },
-      { path: '/admin/matrix', name: 'Matrix', roles: ['admin'] },
-      { path: '/admin/daytype-codes', name: 'Daytype Codes', roles: ['admin'] },
-      { path: '/admin/holidays', name: 'Holidays', roles: ['hr_supervisor', 'admin'] },
-      { path: '/admin/templates', name: 'Templates', roles: ['admin'] },
+      { path: '/admin/sites', name: 'Lokasi', roles: ['admin'] },
+      { path: '/admin/matrix', name: 'Matriks', roles: ['admin'] },
+      { path: '/admin/daytype-codes', name: 'Kode Hari', roles: ['admin'] },
+      { path: '/admin/holidays', name: 'Hari Libur', roles: ['hr_supervisor', 'admin'] },
+      { path: '/admin/templates', name: 'Template', roles: ['admin'] },
     ],
   },
 ];
@@ -70,10 +70,10 @@ export default function AppLayout() {
   const handleLogout = async () => {
     try {
       await logout();
-      message.success('Logged out');
+      message.success('Berhasil keluar');
       navigate('/login');
     } catch {
-      message.error('Logout failed');
+      message.error('Gagal keluar');
     }
   };
 
@@ -81,11 +81,11 @@ export default function AppLayout() {
     setChangingPassword(true);
     try {
       await changePassword(values);
-      message.success('Password changed successfully');
+      message.success('Kata sandi berhasil diubah');
       setPasswordModalOpen(false);
       passwordForm.resetFields();
     } catch (err) {
-      message.error(err?.response?.data?.message || 'Failed to change password');
+      message.error(err?.response?.data?.message || 'Gagal mengubah kata sandi');
     } finally {
       setChangingPassword(false);
     }
@@ -108,20 +108,20 @@ export default function AppLayout() {
     {
       key: 'change-password',
       icon: <KeyOutlined />,
-      label: 'Change Password',
+      label: 'Ubah Kata Sandi',
       onClick: () => setPasswordModalOpen(true),
     },
     {
       key: 'theme',
       icon: isDark ? <BulbFilled /> : <BulbOutlined />,
-      label: isDark ? 'Light Mode' : 'Dark Mode',
+      label: isDark ? 'Mode Terang' : 'Mode Gelap',
       onClick: toggleTheme,
     },
     { type: 'divider' },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Logout',
+      label: 'Keluar',
       danger: true,
       onClick: handleLogout,
     },
@@ -153,7 +153,7 @@ export default function AppLayout() {
       </ProLayout>
 
       <Modal
-        title="Change Password"
+        title="Ubah Kata Sandi"
         open={passwordModalOpen}
         onCancel={() => {
           setPasswordModalOpen(false);
@@ -170,33 +170,33 @@ export default function AppLayout() {
         >
           <Form.Item
             name="current_password"
-            label="Current Password"
-            rules={[{ required: true, message: 'Please enter current password' }]}
+            label="Kata Sandi Saat Ini"
+            rules={[{ required: true, message: 'Masukkan kata sandi saat ini' }]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item
             name="password"
-            label="New Password"
+            label="Kata Sandi Baru"
             rules={[
-              { required: true, message: 'Please enter new password' },
-              { min: 8, message: 'Minimum 8 characters' },
+              { required: true, message: 'Masukkan kata sandi baru' },
+              { min: 8, message: 'Minimal 8 karakter' },
             ]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item
             name="password_confirmation"
-            label="Confirm New Password"
+            label="Konfirmasi Kata Sandi Baru"
             dependencies={['password']}
             rules={[
-              { required: true, message: 'Please confirm new password' },
+              { required: true, message: 'Konfirmasi kata sandi baru' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('Passwords do not match'));
+                  return Promise.reject(new Error('Kata sandi tidak cocok'));
                 },
               }),
             ]}

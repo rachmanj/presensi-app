@@ -108,7 +108,7 @@ export default function SheetReviewPage() {
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <h3 style={{ margin: 0, flex: 1 }}>
-          Review: {sheetInfo?.site_code} — {sheetInfo?.period?.label}
+          Review: {sheetInfo?.site_code} - {sheetInfo?.period?.label}
           <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
             ({rows.length} employees, {daysInMonth} days)
           </span>

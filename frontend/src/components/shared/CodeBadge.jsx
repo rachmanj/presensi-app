@@ -3,7 +3,7 @@ export default function CodeBadge({ code, isOverridden, dayType }) {
     const isWeekend = ['saturday', 'sunday', 'holiday'].includes(dayType);
     return (
       <span style={{ color: isWeekend ? '#999' : '#ccc', fontSize: 11 }}>
-        {isWeekend ? '' : '—'}
+        {isWeekend ? '' : '-'}
       </span>
     );
   }

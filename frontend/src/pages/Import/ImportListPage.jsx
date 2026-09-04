@@ -74,7 +74,7 @@ export default function ImportListPage() {
           onChange={setSheetId}
           options={sheets?.map((s) => ({
             value: s.id,
-            label: `${s.site_code} — Period ${s.period_id}`,
+            label: `${s.site_code} - Period ${s.period_id}`,
           }))}
         />
         <Link to={`/import/upload?sheet=${activeSheetId || ''}`}>

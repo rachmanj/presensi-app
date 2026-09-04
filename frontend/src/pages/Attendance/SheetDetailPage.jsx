@@ -26,7 +26,7 @@ export default function SheetDetailPage() {
 
   const generate = useMutation({
     mutationFn: (sheetId) => attendanceService.sheets.generate(sheetId),
-    onSuccess: () => message.success('Generation queued — refresh in a moment'),
+    onSuccess: () => message.success('Generation queued - refresh in a moment'),
   });
 
   const columns = [

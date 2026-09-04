@@ -90,7 +90,7 @@ export default function DashboardPage() {
       </Card>
 
       <Card
-        title={`Lembur Bulanan — ${overtime?.period?.label || 'Periode aktif'}`}
+        title={`Lembur Bulanan: ${overtime?.period?.label || 'Periode aktif'}`}
         style={{ marginTop: 24 }}
         loading={overtimeLoading}
       >

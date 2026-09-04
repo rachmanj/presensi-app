@@ -49,7 +49,7 @@ export default function ExportPage() {
             }}
             options={sheets?.map((s) => ({
               value: s.id,
-              label: `${s.site_code} — ${latestPeriod?.label} (${s.status})`,
+              label: `${s.site_code} - ${latestPeriod?.label} (${s.status})`,
             }))}
           />
 

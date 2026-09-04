@@ -15,7 +15,7 @@ export default function LeaveBalanceBadge({ balance, showInline = false }) {
   const text = formatBalance(balance);
 
   if (!text) {
-    return showInline ? <span style={{ color: '#999' }}>—</span> : null;
+    return showInline ? <span style={{ color: '#999' }}>-</span> : null;
   }
 
   if (showInline) {

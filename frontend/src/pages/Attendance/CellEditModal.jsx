@@ -30,7 +30,7 @@ export default function CellEditModal({ cell, open, onClose, onSave }) {
 
   return (
     <Modal
-      title={`Edit Cell — ${cell?.employeeName}`}
+      title={`Edit Cell: ${cell?.employeeName}`}
       open={open}
       onCancel={onClose}
       onOk={() => form.submit()}

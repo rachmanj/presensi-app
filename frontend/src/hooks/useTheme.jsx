@@ -1,14 +1,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext({
-  isDark: true,
+  isDark: false,
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const stored = localStorage.getItem('presensi-theme');
-    return stored !== null ? stored === 'dark' : true;
+    return stored !== null ? stored === 'dark' : false;
   });
 
   useEffect(() => {

@@ -75,7 +75,7 @@ export default function ImportUploadPage() {
             <Descriptions.Item label="Import ID">{importRecord.id}</Descriptions.Item>
             <Descriptions.Item label="Format">{importRecord.format}</Descriptions.Item>
             <Descriptions.Item label="Status">{parseStatus?.status || importRecord.status}</Descriptions.Item>
-            <Descriptions.Item label="Matched">{parseStatus?.rows_matched ?? '—'}</Descriptions.Item>
+            <Descriptions.Item label="Matched">{parseStatus?.rows_matched ?? 'Belum'}</Descriptions.Item>
           </Descriptions>
         )}
 
@@ -93,7 +93,7 @@ export default function ImportUploadPage() {
         )}
 
         {parseStatus?.status === 'failed' && (
-          <Alert type="error" message="Parse failed — check error log" style={{ marginTop: 16 }} />
+          <Alert type="error" message="Parse failed - check error log" style={{ marginTop: 16 }} />
         )}
       </Card>
     </div>
