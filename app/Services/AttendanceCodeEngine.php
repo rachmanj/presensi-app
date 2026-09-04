@@ -8,6 +8,7 @@ use App\Models\AttendanceCellTrace;
 use App\Models\AttendanceRow;
 use App\Models\AttendanceSheet;
 use App\Models\FingerprintScan;
+use App\Models\HeroEmployeeCache;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -32,6 +33,7 @@ class AttendanceCodeEngine
         private DayTypeService $dayTypeService,
         private MatrixResolver $matrixResolver,
         private HeroApiClient $heroApiClient,
+        private HeroActivityNormalizer $heroActivityNormalizer,
     ) {}
 
     public function generateForSheet(AttendanceSheet $sheet): void
@@ -247,8 +249,11 @@ class AttendanceCodeEngine
             }
 
             if ($dateStr >= $start && $dateStr <= ($end ?? $start)) {
-                $type = $leave['type'] ?? $leave['leave_type'] ?? 'annual_leave';
-                $code = self::LEAVE_CODES[$type] ?? self::LEAVE_CODES[strtolower((string) $type)] ?? '1901';
+                $type = $leave['type_name'] ?? $leave['type'] ?? $leave['leave_type'] ?? 'annual_leave';
+                $code = $leave['code']
+                    ?? self::LEAVE_CODES[$type]
+                    ?? self::LEAVE_CODES[strtolower((string) $type)]
+                    ?? '1901';
 
                 return [
                     'code' => $code,
@@ -259,8 +264,10 @@ class AttendanceCodeEngine
         }
 
         foreach ($heroActivity['lots'] ?? [] as $lot) {
-            $lotDate = $lot['date'] ?? $lot['start_date'] ?? null;
-            if ($lotDate === $dateStr) {
+            $start = $lot['start_date'] ?? $lot['date'] ?? null;
+            $end = $lot['end_date'] ?? $start;
+
+            if ($start && $dateStr >= $start && $dateStr <= ($end ?? $start)) {
                 return null;
             }
         }
@@ -316,19 +323,31 @@ class AttendanceCodeEngine
 
     private function getHeroActivity(string $nik, Carbon $date, AttendanceSheet $sheet): array
     {
-        $cached = \App\Models\HeroEmployeeCache::where('nik', $nik)->first();
+        $cached = HeroEmployeeCache::where('nik', $nik)->first();
+        $activity = null;
+
         if ($cached?->raw && isset($cached->raw['activity'])) {
-            return $cached->raw['activity'];
+            $activity = $cached->raw['activity'];
+        } else {
+            $period = $sheet->period;
+            $activity = $this->heroApiClient->getActivity($nik, $period->year, $period->month);
+
+            if (is_array($activity) && isset($activity['data'])) {
+                $activity = $activity['data'];
+            }
+
+            $activity = is_array($activity) ? $activity : [];
         }
 
-        $period = $sheet->period;
-        $activity = $this->heroApiClient->getActivity($nik, $period->year, $period->month);
+        $normalized = $this->heroActivityNormalizer->normalize($activity);
 
-        if (is_array($activity) && isset($activity['data'])) {
-            return $activity['data'];
+        if ($cached) {
+            $raw = $cached->raw ?? [];
+            $raw['activity'] = $normalized;
+            $cached->update(['raw' => $raw]);
         }
 
-        return is_array($activity) ? $activity : [];
+        return $normalized;
     }
 
     private function getScanForDate(AttendanceRow $row, Carbon $date, AttendanceSheet $sheet): ?FingerprintScan
@@ -358,9 +377,12 @@ class AttendanceCodeEngine
         }
 
         foreach ($heroActivity['lots'] ?? [] as $lot) {
-            $lotDate = $lot['date'] ?? $lot['start_date'] ?? null;
-            if ($lotDate === $date->toDateString()) {
-                return $lot['destination_site'] ?? $lot['visit_site'] ?? $lot['project_code'] ?? null;
+            $start = $lot['start_date'] ?? $lot['date'] ?? null;
+            $end = $lot['end_date'] ?? $start;
+            $dateStr = $date->toDateString();
+
+            if ($start && $dateStr >= $start && $dateStr <= ($end ?? $start)) {
+                return $lot['site_code'] ?? $lot['destination_site'] ?? $lot['visit_site'] ?? null;
             }
         }
 

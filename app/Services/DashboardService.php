@@ -207,8 +207,10 @@ class DashboardService
         $dateStr = $date->toDateString();
 
         foreach ($activity['lots'] ?? [] as $lot) {
-            $lotDate = $lot['date'] ?? $lot['start_date'] ?? null;
-            if ($lotDate === $dateStr) {
+            $start = $lot['start_date'] ?? $lot['date'] ?? null;
+            $end = $lot['end_date'] ?? $start;
+
+            if ($start && $dateStr >= $start && $dateStr <= ($end ?? $start)) {
                 return true;
             }
         }
