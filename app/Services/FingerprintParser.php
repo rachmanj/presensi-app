@@ -261,8 +261,8 @@ class FingerprintParser
                 $checkInCol = $colMap['Scan masuk'] ?? null;
                 $checkOutCol = $colMap['Scan pulang'] ?? null;
 
-                $checkInCell = $checkInCol !== null ? $sheet->getCellByColumnAndRow($checkInCol + 1, $row) : null;
-                $checkOutCell = $checkOutCol !== null ? $sheet->getCellByColumnAndRow($checkOutCol + 1, $row) : null;
+                $checkInCell = $checkInCol !== null ? $sheet->getCell([$checkInCol + 1, $row]) : null;
+                $checkOutCell = $checkOutCol !== null ? $sheet->getCell([$checkOutCol + 1, $row]) : null;
 
                 $checkInVal = $checkInCell ? $checkInCell->getValue() : null;
                 $checkOutVal = $checkOutCell ? $checkOutCell->getValue() : null;
@@ -445,7 +445,7 @@ class FingerprintParser
 
     private function cellValue(Worksheet $sheet, int $row, int $colIndex): mixed
     {
-        return $sheet->getCellByColumnAndRow($colIndex + 1, $row)->getValue();
+        return $sheet->getCell([$colIndex + 1, $row])->getValue();
     }
 
     private function parseDate(mixed $value): ?string
