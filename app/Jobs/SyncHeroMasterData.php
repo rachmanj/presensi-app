@@ -15,7 +15,7 @@ class SyncHeroMasterData implements ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 600;
+    public int $timeout = 1200;
 
     public function __construct(public ?string $projectCode = null)
     {
