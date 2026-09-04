@@ -56,7 +56,7 @@ class DashboardService
 
         $absentCount = $employees->filter(function ($emp) use ($presentNiks) {
             return ! $presentNiks->contains($emp->nik);
-        })->filter(function ($emp) use ($leaveNiks, $activityByNik) {
+        })->filter(function ($emp) use ($leaveNiks, $activityByNik, $today) {
             if ($leaveNiks->contains($emp->nik)) {
                 return false;
             }
@@ -178,16 +178,12 @@ class DashboardService
 
     private function getEmployeeActivity(string $nik, Carbon $date): array
     {
-        try {
-            $cached = HeroEmployeeCache::where('nik', $nik)->first();
-            if ($cached?->raw && isset($cached->raw['activity'])) {
-                return $cached->raw['activity'];
-            }
-
-            return $this->heroApiClient->getActivity($nik, $date->year, $date->month);
-        } catch (\Throwable) {
-            return [];
+        $cached = HeroEmployeeCache::where('nik', $nik)->first();
+        if ($cached?->raw && isset($cached->raw['activity'])) {
+            return $cached->raw['activity'];
         }
+
+        return [];
     }
 
     private function isOnLeave(array $activity, Carbon $date): bool
