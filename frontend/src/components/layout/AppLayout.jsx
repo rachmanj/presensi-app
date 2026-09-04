@@ -37,8 +37,8 @@ const ALL_MENU_ROUTES = [
 
 const ROLE_LABELS = {
   admin: 'Admin',
-  hr_supervisor: 'Supervisor',
-  hr_staff: 'Staff',
+  hr_supervisor: 'Supervisor HR',
+  hr_staff: 'Staf HR',
 };
 
 function filterMenuByRole(routes, role) {
@@ -96,7 +96,7 @@ export default function AppLayout() {
       key: 'user-info',
       label: (
         <div style={{ padding: '4px 0' }}>
-          <div style={{ fontWeight: 600 }}>{user?.name || 'User'}</div>
+          <div style={{ fontWeight: 600 }}>{user?.name || 'Pengguna'}</div>
           <div style={{ fontSize: 12, opacity: 0.65 }}>
             {ROLE_LABELS[user?.role] || user?.role}
           </div>
@@ -141,7 +141,7 @@ export default function AppLayout() {
         avatarProps={{
           src: null,
           icon: <UserOutlined />,
-          title: user?.name || 'User',
+          title: user?.name || 'Pengguna',
           render: (_, dom) => (
             <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
               {dom}
@@ -161,6 +161,8 @@ export default function AppLayout() {
         }}
         onOk={() => passwordForm.submit()}
         confirmLoading={changingPassword}
+        okText="Simpan"
+        cancelText="Batal"
         destroyOnClose
       >
         <Form

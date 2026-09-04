@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormDatePicker, ProFormDigit, ProFormSelect, ProFormText, ProTable } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import { adminService } from '../../services/adminService';
 import { formatDisplayDate } from '../../utils/dateFormat';
 
@@ -11,25 +11,28 @@ export default function HolidayCalendarPage() {
   const [year, setYear] = useState(2026);
 
   const columns = [
-    { title: 'Date', dataIndex: 'date', width: 120, render: (v) => formatDisplayDate(v) },
-    { title: 'Type', dataIndex: 'type', width: 140 },
-    { title: 'Description', dataIndex: 'description' },
-    { title: 'Year', dataIndex: 'year', width: 80 },
+    { title: 'Tanggal', dataIndex: 'date', width: 120, render: (v) => formatDisplayDate(v) },
+    { title: 'Tipe', dataIndex: 'type', width: 140 },
+    { title: 'Deskripsi', dataIndex: 'description' },
+    { title: 'Tahun', dataIndex: 'year', width: 80 },
     {
-      title: 'Actions',
+      title: 'Aksi',
       valueType: 'option',
       render: (_, record) => [
-        <a key="edit" onClick={() => setEditing(record)}>Edit</a>,
-        <a
+        <a key="edit" onClick={() => setEditing(record)}>Ubah</a>,
+        <Popconfirm
           key="delete"
-          onClick={async () => {
+          title="Hapus hari libur ini?"
+          okText="Hapus"
+          cancelText="Batal"
+          onConfirm={async () => {
             await adminService.holidays.remove(record.id);
-            message.success('Deleted');
+            message.success('Berhasil dihapus');
             actionRef.current?.reload();
           }}
         >
-          Delete
-        </a>,
+          <a>Hapus</a>
+        </Popconfirm>,
       ],
     },
   ];
@@ -37,7 +40,7 @@ export default function HolidayCalendarPage() {
   return (
     <div style={{ padding: 24 }}>
       <ProTable
-        headerTitle="Holiday Calendar"
+        headerTitle="Kalender Hari Libur"
         actionRef={actionRef}
         rowKey="id"
         params={{ year }}
@@ -46,13 +49,13 @@ export default function HolidayCalendarPage() {
             <ProFormDigit
               fieldProps={{ value: year, onChange: setYear, style: { width: 120 } }}
               noStyle
-              placeholder="Year"
+              placeholder="Tahun"
             />
           ),
         }}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => setEditing({ year })}>
-            Add Holiday
+            Tambah Hari Libur
           </Button>,
         ]}
         request={async (params) => ({
@@ -62,10 +65,11 @@ export default function HolidayCalendarPage() {
         columns={columns}
       />
       <ModalForm
-        title={editing?.id ? 'Edit Holiday' : 'Add Holiday'}
+        title={editing?.id ? 'Ubah Hari Libur' : 'Tambah Hari Libur'}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
         initialValues={editing || {}}
+        modalProps={{ okText: 'Simpan', cancelText: 'Batal' }}
         onFinish={async (values) => {
           const payload = {
             ...values,
@@ -73,29 +77,29 @@ export default function HolidayCalendarPage() {
           };
           if (editing?.id) {
             await adminService.holidays.update(editing.id, payload);
-            message.success('Updated');
+            message.success('Berhasil diperbarui');
           } else {
             await adminService.holidays.create(payload);
-            message.success('Created');
+            message.success('Berhasil dibuat');
           }
           setEditing(null);
           actionRef.current?.reload();
           return true;
         }}
       >
-        <ProFormDatePicker name="date" label="Date" rules={[{ required: true }]} />
+        <ProFormDatePicker name="date" label="Tanggal" rules={[{ required: true, message: 'Wajib diisi' }]} />
         <ProFormSelect
           name="type"
-          label="Type"
+          label="Tipe"
           options={[
-            { label: 'National Holiday', value: 'national_holiday' },
-            { label: 'Joint Leave', value: 'joint_leave' },
-            { label: 'Special', value: 'special' },
+            { label: 'Libur Nasional', value: 'national_holiday' },
+            { label: 'Cuti Bersama', value: 'joint_leave' },
+            { label: 'Khusus', value: 'special' },
           ]}
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: 'Wajib diisi' }]}
         />
-        <ProFormText name="description" label="Description" />
-        <ProFormDigit name="year" label="Year" rules={[{ required: true }]} />
+        <ProFormText name="description" label="Deskripsi" />
+        <ProFormDigit name="year" label="Tahun" rules={[{ required: true, message: 'Wajib diisi' }]} />
       </ModalForm>
     </div>
   );

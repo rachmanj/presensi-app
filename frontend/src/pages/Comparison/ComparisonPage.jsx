@@ -87,8 +87,8 @@ export default function ComparisonPage() {
   };
 
   const comparisonEmptyText = periodIds.length < 2
-    ? 'Pilih minimal 2 periode untuk membandingkan data site.'
-    : 'Belum ada data perbandingan untuk site dan periode yang dipilih.';
+    ? 'Pilih minimal 2 periode untuk membandingkan data lokasi.'
+    : 'Belum ada data perbandingan untuk lokasi dan periode yang dipilih.';
 
   const renderSiteComparison = () => {
     if (periodIds.length < 2) {
@@ -114,7 +114,7 @@ export default function ComparisonPage() {
     if (siteError) {
       return (
         <ErrorState
-          description={siteErrorObj?.message || 'Data perbandingan site tidak dapat dimuat.'}
+          description={siteErrorObj?.message || 'Data perbandingan lokasi tidak dapat dimuat.'}
           onRetry={refetchSite}
         />
       );
@@ -173,13 +173,13 @@ export default function ComparisonPage() {
         </Button>
       </Space>
 
-      <Card title={`Perbandingan Site: ${siteCode}`} loading={siteLoading && periodIds.length >= 2 && !siteError}>
+      <Card title={`Perbandingan Lokasi: ${siteCode}`} loading={siteLoading && periodIds.length >= 2 && !siteError}>
         {renderSiteComparison()}
       </Card>
 
       {employeeComparison && (
         <Card
-          title={`Trend: ${employeeComparison.employee_name || employeeComparison.nik}`}
+          title={`Tren: ${employeeComparison.employee_name || employeeComparison.nik}`}
           style={{ marginTop: 24 }}
         >
           <Line {...trendConfig} />

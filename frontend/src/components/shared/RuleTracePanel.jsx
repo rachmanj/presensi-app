@@ -14,7 +14,7 @@ function colorForRule(ruleKey) {
 
 export default function RuleTracePanel({ traces }) {
   if (!traces?.length) {
-    return <p style={{ color: '#999' }}>No trace records available.</p>;
+    return <p style={{ color: '#999' }}>Tidak ada jejak aturan.</p>;
   }
 
   return (

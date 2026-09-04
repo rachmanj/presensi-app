@@ -57,7 +57,7 @@ export default function AuditLogPage() {
         />
       ) : (
       <ProTable
-        headerTitle="Audit Log"
+        headerTitle="Log Audit"
         loading={isLoading}
         dataSource={list}
         rowKey="id"
@@ -69,7 +69,7 @@ export default function AuditLogPage() {
           <Select
             key="action"
             allowClear
-            placeholder="Action"
+            placeholder="Aksi"
             style={{ width: 180 }}
             options={ACTION_OPTIONS.map((a) => ({ value: a, label: a }))}
             onChange={(v) => setFilters((f) => ({ ...f, action: v, page: 1 }))}
@@ -77,7 +77,7 @@ export default function AuditLogPage() {
           <Select
             key="entity"
             allowClear
-            placeholder="Entity"
+            placeholder="Entitas"
             style={{ width: 160 }}
             options={ENTITY_OPTIONS.map((e) => ({ value: e, label: e }))}
             onChange={(v) => setFilters((f) => ({ ...f, entity_type: v, page: 1 }))}
@@ -95,12 +95,12 @@ export default function AuditLogPage() {
           />,
         ]}
         columns={[
-          { title: 'Time', dataIndex: 'created_at', width: 170, render: (v) => formatDisplayDateTime(v) },
-          { title: 'User', dataIndex: ['user', 'name'], width: 140 },
-          { title: 'Action', dataIndex: 'action', width: 160 },
-          { title: 'Entity', dataIndex: 'entity_type', width: 140 },
-          { title: 'Entity ID', dataIndex: 'entity_id', width: 90 },
-          { title: 'Note', dataIndex: 'note', ellipsis: true },
+          { title: 'Waktu', dataIndex: 'created_at', width: 170, render: (v) => formatDisplayDateTime(v) },
+          { title: 'Pengguna', dataIndex: ['user', 'name'], width: 140 },
+          { title: 'Aksi', dataIndex: 'action', width: 160 },
+          { title: 'Entitas', dataIndex: 'entity_type', width: 140 },
+          { title: 'ID Entitas', dataIndex: 'entity_id', width: 90 },
+          { title: 'Catatan', dataIndex: 'note', ellipsis: true },
         ]}
       />
       )}

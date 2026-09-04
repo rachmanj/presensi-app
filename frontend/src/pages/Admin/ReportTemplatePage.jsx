@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea, ProTable } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import { adminService } from '../../services/adminService';
 
 export default function ReportTemplatePage() {
@@ -9,15 +9,15 @@ export default function ReportTemplatePage() {
   const [editing, setEditing] = useState(null);
 
   const columns = [
-    { title: 'Name', dataIndex: 'name', width: 120 },
-    { title: 'Site Profile', dataIndex: 'site_profile', width: 120 },
+    { title: 'Nama', dataIndex: 'name', width: 120 },
+    { title: 'Profil Lokasi', dataIndex: 'site_profile', width: 120 },
     {
-      title: 'Column Layout',
+      title: 'Layout Kolom',
       dataIndex: 'column_layout',
       render: (v) => JSON.stringify(v)?.slice(0, 80) + '...',
     },
     {
-      title: 'Actions',
+      title: 'Aksi',
       valueType: 'option',
       width: 120,
       render: (_, record) => [
@@ -26,17 +26,20 @@ export default function ReportTemplatePage() {
           column_layout: JSON.stringify(record.column_layout, null, 2),
           footer_config: JSON.stringify(record.footer_config || {}, null, 2),
           signature_config: JSON.stringify(record.signature_config || {}, null, 2),
-        })}>Edit</a>,
-        <a
+        })}>Ubah</a>,
+        <Popconfirm
           key="delete"
-          onClick={async () => {
+          title="Hapus template ini?"
+          okText="Hapus"
+          cancelText="Batal"
+          onConfirm={async () => {
             await adminService.reportTemplates.remove(record.id);
-            message.success('Deleted');
+            message.success('Berhasil dihapus');
             actionRef.current?.reload();
           }}
         >
-          Delete
-        </a>,
+          <a>Hapus</a>
+        </Popconfirm>,
       ],
     },
   ];
@@ -52,7 +55,7 @@ export default function ReportTemplatePage() {
   return (
     <div style={{ padding: 24 }}>
       <ProTable
-        headerTitle="Report Templates"
+        headerTitle="Template Laporan"
         actionRef={actionRef}
         rowKey="id"
         search={false}
@@ -67,18 +70,19 @@ export default function ReportTemplatePage() {
               signature_config: '{}',
             })}
           >
-            Add Template
+            Tambah Template
           </Button>,
         ]}
         request={async () => ({ data: await adminService.reportTemplates.list(), success: true })}
         columns={columns}
       />
       <ModalForm
-        title={editing?.id ? 'Edit Template' : 'Add Template'}
+        title={editing?.id ? 'Ubah Template' : 'Tambah Template'}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
         initialValues={editing || {}}
         width={600}
+        modalProps={{ okText: 'Simpan', cancelText: 'Batal' }}
         onFinish={async (values) => {
           const payload = {
             name: values.name,
@@ -88,26 +92,26 @@ export default function ReportTemplatePage() {
             signature_config: parseJson(values.signature_config),
           };
           if (!payload.column_layout) {
-            message.error('Invalid column_layout JSON');
+            message.error('JSON column_layout tidak valid');
             return false;
           }
           if (editing?.id) {
             await adminService.reportTemplates.update(editing.id, payload);
-            message.success('Updated');
+            message.success('Berhasil diperbarui');
           } else {
             await adminService.reportTemplates.create(payload);
-            message.success('Created');
+            message.success('Berhasil dibuat');
           }
           setEditing(null);
           actionRef.current?.reload();
           return true;
         }}
       >
-        <ProFormText name="name" label="Name" rules={[{ required: true }]} />
-        <ProFormText name="site_profile" label="Site Profile" rules={[{ required: true }]} />
-        <ProFormTextArea name="column_layout" label="Column Layout (JSON)" rules={[{ required: true }]} fieldProps={{ rows: 6 }} />
-        <ProFormTextArea name="footer_config" label="Footer Config (JSON)" fieldProps={{ rows: 4 }} />
-        <ProFormTextArea name="signature_config" label="Signature Config (JSON)" fieldProps={{ rows: 4 }} />
+        <ProFormText name="name" label="Nama" rules={[{ required: true, message: 'Wajib diisi' }]} />
+        <ProFormText name="site_profile" label="Profil Lokasi" rules={[{ required: true, message: 'Wajib diisi' }]} />
+        <ProFormTextArea name="column_layout" label="Layout Kolom (JSON)" rules={[{ required: true, message: 'Wajib diisi' }]} fieldProps={{ rows: 6 }} />
+        <ProFormTextArea name="footer_config" label="Konfigurasi Footer (JSON)" fieldProps={{ rows: 4 }} />
+        <ProFormTextArea name="signature_config" label="Konfigurasi Tanda Tangan (JSON)" fieldProps={{ rows: 4 }} />
       </ModalForm>
     </div>
   );

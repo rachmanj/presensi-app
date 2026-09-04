@@ -73,7 +73,7 @@ export default function DashboardPage() {
         <Title level={3} style={{ margin: 0 }}>Dashboard Hari Ini</Title>
         <Select
           allowClear
-          placeholder="Filter by site"
+          placeholder="Filter lokasi"
           style={{ width: 200 }}
           value={siteCode}
           onChange={setSiteCode}
@@ -145,7 +145,7 @@ export default function DashboardPage() {
             pagination={false}
             dataSource={overtime?.sites || []}
             columns={[
-              { title: 'Site', dataIndex: 'site_code' },
+              { title: 'Lokasi', dataIndex: 'site_code' },
               { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
               { title: 'Hari Lembur', dataIndex: 'overtime_days' },
             ]}

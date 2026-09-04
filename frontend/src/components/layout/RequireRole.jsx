@@ -15,8 +15,8 @@ export default function RequireRole({ roles, children }) {
     return (
       <Result
         status="403"
-        title="Access Denied"
-        subTitle="You do not have permission to view this page."
+        title="Akses Ditolak"
+        subTitle="Anda tidak memiliki izin untuk melihat halaman ini."
       />
     );
   }

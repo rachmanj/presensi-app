@@ -75,7 +75,7 @@ export default function SheetReviewPage() {
       ),
     },
     { title: 'NIK', dataIndex: 'nik', fixed: 'left', width: 90 },
-    { title: 'Position', dataIndex: 'position', fixed: 'left', width: 140, ellipsis: true },
+    { title: 'Jabatan', dataIndex: 'position', fixed: 'left', width: 140, ellipsis: true },
   ];
 
   const dateCols = Array.from({ length: daysInMonth }, (_, i) => {
@@ -121,9 +121,9 @@ export default function SheetReviewPage() {
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <h3 style={{ margin: 0, flex: 1 }}>
-          Review: {sheetInfo?.site_code} - {sheetInfo?.period?.label}
+          Tinjauan: {sheetInfo?.site_code} - {sheetInfo?.period?.label}
           <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
-            ({rows.length} employees, {daysInMonth} days)
+            ({rows.length} karyawan, {daysInMonth} hari)
           </span>
         </h3>
         <Button
@@ -131,17 +131,17 @@ export default function SheetReviewPage() {
           loading={isRefreshing}
           onClick={handleRefresh}
         >
-          Refresh
+          Muat Ulang
         </Button>
       </div>
       {isDraftEmpty ? (
-        <Empty description="Sheet belum di-generate. Buka halaman detail sheet lalu klik Generate." />
+        <Empty description="Sheet belum dibuat. Buka halaman detail sheet lalu klik Buat Sheet." />
       ) : (
         <Table
           columns={columns}
           dataSource={rows}
           rowKey="id"
-          scroll={{ x: 400 + daysInMonth * 52 + summaryCols.length * 60 }}
+          scroll={{ x: 'max-content' }}
           size="small"
           pagination={{ pageSize: 50 }}
           bordered
