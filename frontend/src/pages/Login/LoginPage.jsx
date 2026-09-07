@@ -41,8 +41,9 @@ export default function LoginPage() {
         >
           <ProFormText
             name="email"
-            label="Email"
-            rules={[{ required: true, type: 'email', message: 'Masukkan email' }]}
+            label="Email atau Username"
+            fieldProps={{ placeholder: 'Email atau Username' }}
+            rules={[{ required: true, message: 'Masukkan email atau username' }]}
           />
           <ProFormText.Password
             name="password"

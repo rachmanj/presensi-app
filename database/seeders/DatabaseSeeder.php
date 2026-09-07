@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@arka.local'],
             [
                 'name' => 'HR Admin',
+                'username' => 'admin',
                 'password' => bcrypt('password'),
                 'role' => 'admin',
             ]
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'supervisor@arka.local'],
             [
                 'name' => 'HR Supervisor',
+                'username' => 'supervisor',
                 'password' => bcrypt('password'),
                 'role' => 'hr_supervisor',
             ]
@@ -31,6 +33,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'staff@arka.local'],
             [
                 'name' => 'HR Staff',
+                'username' => 'staff',
                 'password' => bcrypt('password'),
                 'role' => 'hr_staff',
             ]

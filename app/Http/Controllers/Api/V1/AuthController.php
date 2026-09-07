@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogService;
+use App\Support\LoginIdentifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,10 +14,15 @@ class AuthController extends Controller
 {
     public function login(Request $request, AuditLogService $audit): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $validated = $request->validate([
+            'email' => ['required', 'string'],
             'password' => ['required'],
         ]);
+
+        $credentials = LoginIdentifier::resolveCredentials(
+            $validated['email'],
+            $validated['password'],
+        );
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
