@@ -38,4 +38,4 @@ Status: dokumen arah. Token tema belum diterapkan; penerapan dilakukan sebagai p
 - Teal primary: segar dan konsisten dengan ekosistem ARKA, bukan biru AI default.
 - Dark mode default light: tool kantor dipakai siang hari; toggle tetap tersedia.
 - Empty/error state eksplisit: HR tidak boleh salah baca nol dari kegagalan jaringan sebagai kehadiran nol.
-- Bahasa UI Indonesia: pengguna HR ARKA berbahasa Indonesia; kode/status data tetap apa adanya.
+- Bahasa UI English (keputusan Iwan 2026-09-07): dipakai seragam di seluruh antarmuka; data/status API tetap apa adanya.
