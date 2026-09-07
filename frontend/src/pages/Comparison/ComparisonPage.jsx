@@ -47,7 +47,7 @@ export default function ComparisonPage() {
   const { data: employeeComparison } = useQuery({
     queryKey: ['comparison-employee', searchNik, periodIds, siteCode],
     queryFn: () => comparisonService.employee(searchNik, periodIds, siteCode),
-    enabled: searchNik && periodIds.length >= 2,
+    enabled: !!searchNik && periodIds.length >= 2,
   });
 
   const gridData = useMemo(() => {
