@@ -116,7 +116,7 @@ export default function EmployeeMappingPage() {
         />
       )}
 
-      <Card title="Antrian Belum Tercocok" style={{ marginTop: 24 }}>
+      <Card title="Unmatched Queue" style={{ marginTop: 24 }}>
         <ProTable
           columns={[
             { title: 'NIP', dataIndex: 'raw_nip' },
