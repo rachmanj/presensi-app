@@ -19,19 +19,19 @@ export default function SheetDetailPage() {
   const createSheet = useMutation({
     mutationFn: (siteCode) => attendanceService.periods.createSheet(periodId, { site_code: siteCode }),
     onSuccess: () => {
-      message.success('Sheet berhasil dibuat');
+      message.success('Sheet created successfully');
       queryClient.invalidateQueries({ queryKey: ['period-sheets', periodId] });
     },
   });
 
   const generate = useMutation({
     mutationFn: (sheetId) => attendanceService.sheets.generate(sheetId),
-    onSuccess: () => message.success('Pembuatan sheet dalam antrian, muat ulang sebentar lagi'),
+    onSuccess: () => message.success('Sheet generation queued, reload in a moment'),
   });
 
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
-    { title: 'Lokasi', dataIndex: 'site_code', width: 80 },
+    { title: 'Site', dataIndex: 'site_code', width: 80 },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -40,15 +40,15 @@ export default function SheetDetailPage() {
     },
     { title: 'Template', dataIndex: ['report_template', 'name'], ellipsis: true },
     {
-      title: 'Aksi',
+      title: 'Actions',
       render: (_, record) => (
         <Space>
           <Link to={`/attendance/sheet/${record.id}/review`}>
-            <Button type="link" size="small">Tinjau Grid</Button>
+            <Button type="link" size="small">Review Grid</Button>
           </Link>
-          <Button type="link" size="small" onClick={() => generate.mutate(record.id)} disabled={!canGenerate}>Buat Sheet</Button>
+          <Button type="link" size="small" onClick={() => generate.mutate(record.id)} disabled={!canGenerate}>Generate</Button>
           <Link to={`/export?sheet=${record.id}`}>
-            <Button type="link" size="small">Ekspor</Button>
+            <Button type="link" size="small">Export</Button>
           </Link>
         </Space>
       ),
@@ -60,7 +60,7 @@ export default function SheetDetailPage() {
       <Space style={{ marginBottom: 16 }}>
         <Button onClick={() => createSheet.mutate('HO')}>+ HO Sheet</Button>
         <Button onClick={() => createSheet.mutate('APS')}>+ APS Sheet</Button>
-        <Link to="/attendance"><Button>Kembali ke Periode</Button></Link>
+        <Link to="/attendance"><Button>Back to Periods</Button></Link>
       </Space>
       <ProTable
         columns={columns}
@@ -68,7 +68,7 @@ export default function SheetDetailPage() {
         loading={isLoading}
         rowKey="id"
         search={false}
-        headerTitle={`Sheet untuk Periode #${periodId}`}
+        headerTitle={`Sheets for Period #${periodId}`}
       />
     </div>
   );

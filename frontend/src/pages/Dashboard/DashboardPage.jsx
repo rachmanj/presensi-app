@@ -63,17 +63,17 @@ export default function DashboardPage() {
       formatter: (datum) => `${datum.percentage}%`,
     },
     meta: {
-      percentage: { alias: 'Kehadiran %', min: 0, max: 100 },
+      percentage: { alias: 'Attendance %', min: 0, max: 100 },
     },
   };
 
   return (
     <div style={{ padding: 24 }}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Title level={3} style={{ margin: 0 }}>Dashboard Hari Ini</Title>
+        <Title level={3} style={{ margin: 0 }}>Today Dashboard</Title>
         <Select
           allowClear
-          placeholder="Filter lokasi"
+          placeholder="Filter site"
           style={{ width: 200 }}
           value={siteCode}
           onChange={setSiteCode}
@@ -84,7 +84,7 @@ export default function DashboardPage() {
       {summaryError ? (
         <Card>
           <ErrorState
-            description={summaryErrorObj?.message || 'Ringkasan kehadiran tidak dapat dimuat.'}
+            description={summaryErrorObj?.message || 'Failed to load attendance summary.'}
             onRetry={refetchSummary}
           />
         </Card>
@@ -92,35 +92,35 @@ export default function DashboardPage() {
         <Row gutter={[16, 16]}>
           <Col xs={12} md={6} lg={6} xl={6}>
             <Card loading={summaryLoading}>
-              <Statistic title="Hadir" value={summary?.present ?? 0} valueStyle={{ color: '#3f8600' }} />
+              <Statistic title="Present" value={summary?.present ?? 0} valueStyle={{ color: '#3f8600' }} />
             </Card>
           </Col>
           <Col xs={12} md={6} lg={6} xl={6}>
             <Card loading={summaryLoading}>
-              <Statistic title="Terlambat" value={summary?.late ?? 0} valueStyle={{ color: '#faad14' }} />
+              <Statistic title="Late" value={summary?.late ?? 0} valueStyle={{ color: '#faad14' }} />
             </Card>
           </Col>
           <Col xs={12} md={6} lg={6} xl={6}>
             <Card loading={summaryLoading}>
-              <Statistic title="Cuti" value={summary?.on_leave ?? 0} valueStyle={{ color: '#1890ff' }} />
+              <Statistic title="On Leave" value={summary?.on_leave ?? 0} valueStyle={{ color: '#1890ff' }} />
             </Card>
           </Col>
           <Col xs={12} md={6} lg={6} xl={6}>
             <Card loading={summaryLoading} style={{ borderLeft: '4px solid #cf1322' }}>
-              <Statistic title="Absen" value={summary?.absent ?? 0} valueStyle={{ color: '#cf1322' }} />
+              <Statistic title="Absent" value={summary?.absent ?? 0} valueStyle={{ color: '#cf1322' }} />
             </Card>
           </Col>
         </Row>
       )}
 
       <Card
-        title="Kehadiran 7 Hari Terakhir"
+        title="Attendance Last 7 Days"
         style={{ marginTop: 24 }}
         loading={trendLoading && !trendError}
       >
         {trendError ? (
           <ErrorState
-            description={trendErrorObj?.message || 'Grafik tren kehadiran tidak dapat dimuat.'}
+            description={trendErrorObj?.message || 'Failed to load attendance trend chart.'}
             onRetry={refetchTrend}
           />
         ) : (
@@ -129,13 +129,13 @@ export default function DashboardPage() {
       </Card>
 
       <Card
-        title={`Lembur Bulanan: ${overtime?.period?.label || 'Periode aktif'}`}
+        title={`Monthly Overtime: ${overtime?.period?.label || 'Active period'}`}
         style={{ marginTop: 24 }}
         loading={overtimeLoading && !overtimeError}
       >
         {overtimeError ? (
           <ErrorState
-            description={overtimeErrorObj?.message || 'Data lembur tidak dapat dimuat.'}
+            description={overtimeErrorObj?.message || 'Failed to load overtime data.'}
             onRetry={refetchOvertime}
           />
         ) : (
@@ -145,9 +145,9 @@ export default function DashboardPage() {
             pagination={false}
             dataSource={overtime?.sites || []}
             columns={[
-              { title: 'Lokasi', dataIndex: 'site_code' },
-              { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
-              { title: 'Hari Lembur', dataIndex: 'overtime_days' },
+              { title: 'Site', dataIndex: 'site_code' },
+              { title: 'Overtime Hours', dataIndex: 'overtime_hours' },
+              { title: 'Overtime Days', dataIndex: 'overtime_days' },
             ]}
           />
         )}

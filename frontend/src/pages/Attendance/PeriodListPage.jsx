@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import ErrorState from '../../components/shared/ErrorState';
 import { attendanceService } from '../../services/attendanceService';
 
-const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export default function PeriodListPage() {
   const queryClient = useQueryClient();
@@ -21,7 +21,7 @@ export default function PeriodListPage() {
   const createMutation = useMutation({
     mutationFn: attendanceService.periods.create,
     onSuccess: () => {
-      message.success('Periode berhasil dibuat');
+      message.success('Period created successfully');
       queryClient.invalidateQueries({ queryKey: ['periods'] });
       setCreateOpen(false);
       form.resetFields();
@@ -31,8 +31,8 @@ export default function PeriodListPage() {
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
     { title: 'Label', dataIndex: 'label' },
-    { title: 'Tahun', dataIndex: 'year', width: 80 },
-    { title: 'Bulan', dataIndex: 'month', width: 80, render: (m) => monthNames[m] },
+    { title: 'Year', dataIndex: 'year', width: 80 },
+    { title: 'Month', dataIndex: 'month', width: 80, render: (m) => monthNames[m] },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -41,10 +41,10 @@ export default function PeriodListPage() {
     },
     { title: 'Sheet', dataIndex: 'sheets_count', width: 80 },
     {
-      title: 'Aksi',
+      title: 'Actions',
       render: (_, record) => (
         <Link to={`/attendance/${record.id}`}>
-          <Button type="link" size="small">Lihat Sheet</Button>
+          <Button type="link" size="small">View Sheets</Button>
         </Link>
       ),
     },
@@ -53,11 +53,11 @@ export default function PeriodListPage() {
   return (
     <div style={{ padding: 24 }}>
       <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={() => setCreateOpen(true)}>Periode Baru</Button>
+        <Button type="primary" onClick={() => setCreateOpen(true)}>New Period</Button>
       </Space>
       {isError ? (
         <ErrorState
-          description={error?.message || 'Daftar periode tidak dapat dimuat.'}
+          description={error?.message || 'Failed to load period list.'}
           onRetry={refetch}
         />
       ) : (
@@ -67,25 +67,25 @@ export default function PeriodListPage() {
           loading={isLoading}
           rowKey="id"
           search={false}
-          headerTitle="Periode Kehadiran"
-          locale={{ emptyText: 'Belum ada periode. Buat periode baru untuk mulai.' }}
+          headerTitle="Attendance Periods"
+          locale={{ emptyText: 'No periods yet. Create a new period to get started.' }}
         />
       )}
 
       <Modal
-        title="Buat Periode"
+        title="Create Period"
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         onOk={() => form.submit()}
         confirmLoading={createMutation.isPending}
-        okText="Simpan"
-        cancelText="Batal"
+        okText="Save"
+        cancelText="Cancel"
       >
         <Form form={form} layout="vertical" onFinish={(v) => createMutation.mutate(v)} initialValues={{ year: 2026, month: 6 }}>
-          <Form.Item name="year" label="Tahun" rules={[{ required: true, message: 'Wajib diisi' }]}>
+          <Form.Item name="year" label="Year" rules={[{ required: true, message: 'Required' }]}>
             <InputNumber min={2020} max={2099} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="month" label="Bulan" rules={[{ required: true, message: 'Wajib diisi' }]}>
+          <Form.Item name="month" label="Month" rules={[{ required: true, message: 'Required' }]}>
             <Select options={monthNames.slice(1).map((m, i) => ({ value: i + 1, label: m }))} />
           </Form.Item>
         </Form>

@@ -45,7 +45,7 @@ export default function ExportPage() {
   const renderPreviewArea = () => {
     if (!activeSheet) {
       return (
-        <Empty description="Belum ada sheet tersedia. Buat periode dan buat sheet terlebih dahulu." />
+        <Empty description="No sheets available yet. Create a period and generate a sheet first." />
       );
     }
 
@@ -56,7 +56,7 @@ export default function ExportPage() {
     if (previewError) {
       return (
         <ErrorState
-          description={previewErrorObj?.message || 'Pratinjau ekspor tidak dapat dimuat.'}
+          description={previewErrorObj?.message || 'Failed to load export preview.'}
           onRetry={refetchPreview}
         />
       );
@@ -64,27 +64,27 @@ export default function ExportPage() {
 
     if (!preview) {
       return (
-        <Empty description="Sheet ini belum memiliki data untuk diekspor. Buat sheet terlebih dahulu." />
+        <Empty description="This sheet has no data to export yet. Generate the sheet first." />
       );
     }
 
     return (
       <Descriptions bordered size="small" column={1}>
-        <Descriptions.Item label="Lokasi">{preview.sheet?.site_code}</Descriptions.Item>
-        <Descriptions.Item label="Periode">{preview.sheet?.period?.label}</Descriptions.Item>
+        <Descriptions.Item label="Site">{preview.sheet?.site_code}</Descriptions.Item>
+        <Descriptions.Item label="Period">{preview.sheet?.period?.label}</Descriptions.Item>
         <Descriptions.Item label="Template">{preview.sheet?.report_template?.name}</Descriptions.Item>
-        <Descriptions.Item label="Karyawan">{preview.summary?.total_employees}</Descriptions.Item>
-        <Descriptions.Item label="Sel Di-override">{preview.summary?.overridden_cells}</Descriptions.Item>
+        <Descriptions.Item label="Employees">{preview.summary?.total_employees}</Descriptions.Item>
+        <Descriptions.Item label="Overridden Cells">{preview.summary?.overridden_cells}</Descriptions.Item>
       </Descriptions>
     );
   };
 
   return (
     <div style={{ padding: 24, maxWidth: 640 }}>
-      <Card title="Ekspor Laporan Kehadiran" loading={sheetsLoading}>
+      <Card title="Export Attendance Report" loading={sheetsLoading}>
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           <Select
-            placeholder="Pilih sheet untuk ekspor"
+            placeholder="Select sheet to export"
             style={{ width: '100%' }}
             value={activeSheet ? Number(activeSheet) : undefined}
             onChange={(v) => {
@@ -100,14 +100,14 @@ export default function ExportPage() {
           {renderPreviewArea()}
 
           <Button type="primary" size="large" onClick={handleDownload} disabled={!activeSheet || !preview}>
-            Unduh Excel
+            Download Excel
           </Button>
           <Button
             size="large"
             onClick={() => window.open(exportService.downloadPdfUrl(activeSheet), '_blank')}
             disabled={!activeSheet || !preview}
           >
-            Unduh PDF
+            Download PDF
           </Button>
         </Space>
       </Card>

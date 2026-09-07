@@ -87,8 +87,8 @@ export default function ComparisonPage() {
   };
 
   const comparisonEmptyText = periodIds.length < 2
-    ? 'Pilih minimal 2 periode untuk membandingkan data lokasi.'
-    : 'Belum ada data perbandingan untuk lokasi dan periode yang dipilih.';
+    ? 'Select at least 2 periods to compare site data.'
+    : 'No comparison data for the selected site and periods.';
 
   const renderSiteComparison = () => {
     if (periodIds.length < 2) {
@@ -100,12 +100,12 @@ export default function ComparisonPage() {
           pagination={false}
           locale={{ emptyText: comparisonEmptyText }}
           columns={[
-            { title: 'Periode', dataIndex: 'period' },
-            { title: 'Kehadiran %', dataIndex: 'attendance_pct' },
-            { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
-            { title: 'Cuti', dataIndex: 'leave_count' },
-            { title: 'Absen', dataIndex: 'absent_count' },
-            { title: 'Karyawan', dataIndex: 'employees' },
+            { title: 'Period', dataIndex: 'period' },
+            { title: 'Attendance %', dataIndex: 'attendance_pct' },
+            { title: 'Overtime Hours', dataIndex: 'overtime_hours' },
+            { title: 'On Leave', dataIndex: 'leave_count' },
+            { title: 'Absent', dataIndex: 'absent_count' },
+            { title: 'Employees', dataIndex: 'employees' },
           ]}
         />
       );
@@ -114,7 +114,7 @@ export default function ComparisonPage() {
     if (siteError) {
       return (
         <ErrorState
-          description={siteErrorObj?.message || 'Data perbandingan lokasi tidak dapat dimuat.'}
+          description={siteErrorObj?.message || 'Failed to load site comparison data.'}
           onRetry={refetchSite}
         />
       );
@@ -128,16 +128,16 @@ export default function ComparisonPage() {
         pagination={false}
         locale={{ emptyText: comparisonEmptyText }}
         columns={[
-          { title: 'Periode', dataIndex: 'period' },
+          { title: 'Period', dataIndex: 'period' },
           {
-            title: 'Kehadiran %',
+            title: 'Attendance %',
             dataIndex: 'attendance_pct',
             render: (v) => <span style={{ color: pctColor(v), fontWeight: 600 }}>{v}%</span>,
           },
-          { title: 'Jam Lembur', dataIndex: 'overtime_hours' },
-          { title: 'Cuti', dataIndex: 'leave_count' },
-          { title: 'Absen', dataIndex: 'absent_count' },
-          { title: 'Karyawan', dataIndex: 'employees' },
+          { title: 'Overtime Hours', dataIndex: 'overtime_hours' },
+          { title: 'On Leave', dataIndex: 'leave_count' },
+          { title: 'Absent', dataIndex: 'absent_count' },
+          { title: 'Employees', dataIndex: 'employees' },
         ]}
       />
     );
@@ -145,12 +145,12 @@ export default function ComparisonPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>Perbandingan Multi-Bulan</Title>
+      <Title level={3}>Multi-Month Comparison</Title>
 
       <Space wrap style={{ marginBottom: 24 }}>
         <Select
           mode="multiple"
-          placeholder="Pilih 2-6 periode"
+          placeholder="Select 2-6 periods"
           style={{ minWidth: 320 }}
           value={periodIds}
           onChange={(v) => setPeriodIds(v.slice(0, 6))}
@@ -163,23 +163,23 @@ export default function ComparisonPage() {
           options={(sites || []).map((s) => ({ value: s.code, label: s.code }))}
         />
         <Input
-          placeholder="NIK karyawan"
+          placeholder="Employee NIK"
           value={nik}
           onChange={(e) => setNik(e.target.value)}
           style={{ width: 140 }}
         />
         <Button type="primary" onClick={() => setSearchNik(nik)} disabled={!nik || periodIds.length < 2}>
-          Cari Karyawan
+          Search Employee
         </Button>
       </Space>
 
-      <Card title={`Perbandingan Lokasi: ${siteCode}`} loading={siteLoading && periodIds.length >= 2 && !siteError}>
+      <Card title={`Site Comparison: ${siteCode}`} loading={siteLoading && periodIds.length >= 2 && !siteError}>
         {renderSiteComparison()}
       </Card>
 
       {employeeComparison && (
         <Card
-          title={`Tren: ${employeeComparison.employee_name || employeeComparison.nik}`}
+          title={`Trend: ${employeeComparison.employee_name || employeeComparison.nik}`}
           style={{ marginTop: 24 }}
         >
           <Line {...trendConfig} />

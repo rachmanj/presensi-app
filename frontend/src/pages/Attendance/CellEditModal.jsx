@@ -30,39 +30,39 @@ export default function CellEditModal({ cell, open, onClose, onSave }) {
 
   return (
     <Modal
-      title={`Ubah Sel: ${cell?.employeeName}`}
+      title={`Edit Cell: ${cell?.employeeName}`}
       open={open}
       onCancel={onClose}
       onOk={() => form.submit()}
-      okText="Simpan"
-      cancelText="Batal"
+      okText="Save"
+      cancelText="Cancel"
       width={560}
     >
       <Descriptions size="small" column={2} style={{ marginBottom: 16 }}>
-        <Descriptions.Item label="Tanggal">{cell?.work_date}</Descriptions.Item>
-        <Descriptions.Item label="Tipe Hari">{cell?.day_type}</Descriptions.Item>
-        <Descriptions.Item label="Kode Otomatis">
+        <Descriptions.Item label="Date">{cell?.work_date}</Descriptions.Item>
+        <Descriptions.Item label="Day Type">{cell?.day_type}</Descriptions.Item>
+        <Descriptions.Item label="Auto Code">
           <CodeBadge code={cell?.auto_code} dayType={cell?.day_type} />
         </Descriptions.Item>
-        <Descriptions.Item label="Kode Final">
+        <Descriptions.Item label="Final Code">
           <CodeBadge code={cell?.final_code} isOverridden={cell?.is_overridden} dayType={cell?.day_type} />
         </Descriptions.Item>
       </Descriptions>
 
       <Form form={form} layout="vertical" onFinish={onSave}>
-        <Form.Item name="final_code" label="Kode Override">
-          <Select options={CODE_OPTIONS} allowClear showSearch placeholder="Cari kode" />
+        <Form.Item name="final_code" label="Override Code">
+          <Select options={CODE_OPTIONS} allowClear showSearch placeholder="Search code" />
         </Form.Item>
         <Form.Item
           name="override_reason"
-          label="Alasan Override"
-          rules={[{ required: true, message: 'Wajib diisi' }]}
+          label="Override Reason"
+          rules={[{ required: true, message: 'Required' }]}
         >
-          <Input.TextArea rows={2} placeholder="Mengapa kode ini diubah?" />
+          <Input.TextArea rows={2} placeholder="Why was this code changed?" />
         </Form.Item>
       </Form>
 
-      <h4 style={{ marginTop: 16 }}>Jejak Aturan</h4>
+      <h4 style={{ marginTop: 16 }}>Rule Trace</h4>
       <RuleTracePanel traces={traces} />
     </Modal>
   );

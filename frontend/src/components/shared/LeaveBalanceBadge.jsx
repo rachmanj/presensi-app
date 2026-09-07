@@ -4,10 +4,10 @@ function formatBalance(balance) {
   if (!balance || !Array.isArray(balance)) return null;
 
   return balance.map((item) => {
-    const name = item.leave_type_name || item.type || item.name || 'Cuti';
+    const name = item.leave_type_name || item.type || item.name || 'Leave';
     const days = item.remaining_days ?? item.remaining ?? item.days ?? 0;
 
-    return `${name}: ${days} hari`;
+    return `${name}: ${days} days`;
   }).join(', ');
 }
 
@@ -21,14 +21,14 @@ export default function LeaveBalanceBadge({ balance, showInline = false }) {
   if (showInline) {
     return (
       <Tooltip title={text}>
-        <Tag color="blue" style={{ cursor: 'help' }}>Cuti</Tag>
+        <Tag color="blue" style={{ cursor: 'help' }}>Leave</Tag>
       </Tooltip>
     );
   }
 
   return (
     <Tooltip title={text}>
-      <Tag color="blue" style={{ cursor: 'help', marginLeft: 4 }}>Cuti</Tag>
+      <Tag color="blue" style={{ cursor: 'help', marginLeft: 4 }}>Leave</Tag>
     </Tooltip>
   );
 }

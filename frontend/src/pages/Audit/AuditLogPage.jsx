@@ -52,24 +52,24 @@ export default function AuditLogPage() {
     <div style={{ padding: 24 }}>
       {isError ? (
         <ErrorState
-          description={error?.message || 'Log audit tidak dapat dimuat.'}
+          description={error?.message || 'Failed to load audit log.'}
           onRetry={refetch}
         />
       ) : (
       <ProTable
-        headerTitle="Log Audit"
+        headerTitle="Audit Log"
         loading={isLoading}
         dataSource={list}
         rowKey="id"
         search={false}
         pagination={{ total: data?.total, pageSize: filters.per_page || 25 }}
         onChange={(pagination) => setFilters((f) => ({ ...f, page: pagination.current, per_page: pagination.pageSize }))}
-        locale={{ emptyText: 'Belum ada aktivitas tercatat.' }}
+        locale={{ emptyText: 'No activity recorded yet.' }}
         toolBarRender={() => [
           <Select
             key="action"
             allowClear
-            placeholder="Aksi"
+            placeholder="Action"
             style={{ width: 180 }}
             options={ACTION_OPTIONS.map((a) => ({ value: a, label: a }))}
             onChange={(v) => setFilters((f) => ({ ...f, action: v, page: 1 }))}
@@ -77,7 +77,7 @@ export default function AuditLogPage() {
           <Select
             key="entity"
             allowClear
-            placeholder="Entitas"
+            placeholder="Entity"
             style={{ width: 160 }}
             options={ENTITY_OPTIONS.map((e) => ({ value: e, label: e }))}
             onChange={(v) => setFilters((f) => ({ ...f, entity_type: v, page: 1 }))}
@@ -95,12 +95,12 @@ export default function AuditLogPage() {
           />,
         ]}
         columns={[
-          { title: 'Waktu', dataIndex: 'created_at', width: 170, render: (v) => formatDisplayDateTime(v) },
-          { title: 'Pengguna', dataIndex: ['user', 'name'], width: 140 },
-          { title: 'Aksi', dataIndex: 'action', width: 160 },
-          { title: 'Entitas', dataIndex: 'entity_type', width: 140 },
-          { title: 'ID Entitas', dataIndex: 'entity_id', width: 90 },
-          { title: 'Catatan', dataIndex: 'note', ellipsis: true },
+          { title: 'Time', dataIndex: 'created_at', width: 170, render: (v) => formatDisplayDateTime(v) },
+          { title: 'User', dataIndex: ['user', 'name'], width: 140 },
+          { title: 'Action', dataIndex: 'action', width: 160 },
+          { title: 'Entity', dataIndex: 'entity_type', width: 140 },
+          { title: 'Entity ID', dataIndex: 'entity_id', width: 90 },
+          { title: 'Note', dataIndex: 'note', ellipsis: true },
         ]}
       />
       )}

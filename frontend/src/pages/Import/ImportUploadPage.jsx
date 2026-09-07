@@ -61,7 +61,7 @@ export default function ImportUploadPage() {
   if (!sheetId) {
     return (
       <div style={{ padding: 24 }}>
-        <Alert type="warning" message="Belum ada sheet dipilih. Buka daftar impor dan pilih sheet terlebih dahulu." />
+        <Alert type="warning" message="No sheet selected. Open the import list and select a sheet first." />
       </div>
     );
   }
@@ -77,9 +77,9 @@ export default function ImportUploadPage() {
   if (sheetError) {
     return (
       <div style={{ padding: 24 }}>
-        <Card title="Unggah File Fingerprint">
+        <Card title="Upload Fingerprint File">
           <ErrorState
-            description={sheetErrorObj?.message || 'Data sheet tidak dapat dimuat.'}
+            description={sheetErrorObj?.message || 'Failed to load sheet data.'}
             onRetry={refetchSheet}
           />
         </Card>
@@ -89,7 +89,7 @@ export default function ImportUploadPage() {
 
   return (
     <div style={{ padding: 24, maxWidth: 720 }}>
-      <Card title="Unggah File Fingerprint">
+      <Card title="Upload Fingerprint File">
         <Dragger
           accept=".xls,.xlsx"
           showUploadList={false}
@@ -99,36 +99,36 @@ export default function ImportUploadPage() {
           <p className="ant-upload-drag-icon">
             <InboxOutlined />
           </p>
-          <p className="ant-upload-text">Klik atau seret file fingerprint .xls ke sini</p>
-          <p className="ant-upload-hint">Format 1 (log scan) atau Format 2 (pasangan + DNC)</p>
+          <p className="ant-upload-text">Click or drag a fingerprint .xls file here</p>
+          <p className="ant-upload-hint">Format 1 (scan log) or Format 2 (pair + DNC)</p>
         </Dragger>
 
         {uploading && <Progress percent={progress} style={{ marginTop: 16 }} />}
 
         {importRecord && (
           <Descriptions bordered size="small" style={{ marginTop: 16 }} column={2}>
-            <Descriptions.Item label="ID Impor">{importRecord.id}</Descriptions.Item>
+            <Descriptions.Item label="Import ID">{importRecord.id}</Descriptions.Item>
             <Descriptions.Item label="Format">{importRecord.format}</Descriptions.Item>
             <Descriptions.Item label="Status">{parseStatus?.status || importRecord.status}</Descriptions.Item>
-            <Descriptions.Item label="Tercocok">{parseStatus?.rows_matched ?? 'Belum'}</Descriptions.Item>
+            <Descriptions.Item label="Matched">{parseStatus?.rows_matched ?? 'Pending'}</Descriptions.Item>
           </Descriptions>
         )}
 
         {parseStatus?.status === 'parsed' && (
           <Alert
             type="success"
-            message="Parse selesai"
+            message="Parse complete"
             style={{ marginTop: 16 }}
             action={
               <Button size="small" onClick={() => navigate('/import')}>
-                Kembali ke daftar
+                Back to list
               </Button>
             }
           />
         )}
 
         {parseStatus?.status === 'failed' && (
-          <Alert type="error" message="Parse gagal, periksa log error" style={{ marginTop: 16 }} />
+          <Alert type="error" message="Parse failed, check error log" style={{ marginTop: 16 }} />
         )}
       </Card>
     </div>

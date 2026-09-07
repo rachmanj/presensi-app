@@ -10,33 +10,33 @@ export default function SiteConfigPage() {
 
   const columns = [
     { title: 'Code', dataIndex: 'code', width: 80 },
-    { title: 'Nama', dataIndex: 'name' },
-    { title: 'Profil', dataIndex: 'profile', width: 100 },
-    { title: 'Kode Hadir Dasar', dataIndex: 'base_present_code', width: 140 },
+    { title: 'Name', dataIndex: 'name' },
+    { title: 'Profile', dataIndex: 'profile', width: 100 },
+    { title: 'Base Present Code', dataIndex: 'base_present_code', width: 140 },
     {
-      title: 'Aktif',
+      title: 'Active',
       dataIndex: 'active',
       width: 80,
-      render: (v) => (v ? 'Ya' : 'No'),
+      render: (v) => (v ? 'Yes' : 'No'),
     },
     {
-      title: 'Aksi',
+      title: 'Actions',
       valueType: 'option',
       width: 120,
       render: (_, record) => [
-        <a key="edit" onClick={() => setEditing(record)}>Ubah</a>,
+        <a key="edit" onClick={() => setEditing(record)}>Edit</a>,
         <Popconfirm
           key="delete"
-          title="Hapus lokasi ini?"
-          okText="Hapus"
-          cancelText="Batal"
+          title="Delete this site?"
+          okText="Delete"
+          cancelText="Cancel"
           onConfirm={async () => {
             await adminService.sites.remove(record.id);
-            message.success('Berhasil dihapus');
+            message.success('Deleted successfully');
             actionRef.current?.reload();
           }}
         >
-          <a>Hapus</a>
+          <a>Delete</a>
         </Popconfirm>,
       ],
     },
@@ -45,51 +45,51 @@ export default function SiteConfigPage() {
   return (
     <div style={{ padding: 24 }}>
       <ProTable
-        headerTitle="Konfigurasi Lokasi"
+        headerTitle="Site Configuration"
         actionRef={actionRef}
         rowKey="id"
         search={false}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => setEditing({})}>
-            Tambah Lokasi
+            Add Site
           </Button>,
         ]}
         request={async () => ({ data: await adminService.sites.list(), success: true })}
         columns={columns}
       />
       <ModalForm
-        title={editing?.id ? 'Ubah Lokasi' : 'Tambah Lokasi'}
+        title={editing?.id ? 'Edit Site' : 'Add Site'}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
         initialValues={editing || { active: true, profile: 'office' }}
-        modalProps={{ okText: 'Simpan', cancelText: 'Batal' }}
+        modalProps={{ okText: 'Save', cancelText: 'Cancel' }}
         onFinish={async (values) => {
           if (editing?.id) {
             await adminService.sites.update(editing.id, values);
-            message.success('Berhasil diperbarui');
+            message.success('Updated successfully');
           } else {
             await adminService.sites.create(values);
-            message.success('Berhasil dibuat');
+            message.success('Created successfully');
           }
           setEditing(null);
           actionRef.current?.reload();
           return true;
         }}
       >
-        <ProFormText name="code" label="Code" rules={[{ required: true, message: 'Wajib diisi' }]} disabled={!!editing?.id} />
-        <ProFormText name="name" label="Nama" rules={[{ required: true, message: 'Wajib diisi' }]} />
+        <ProFormText name="code" label="Code" rules={[{ required: true, message: 'Required' }]} disabled={!!editing?.id} />
+        <ProFormText name="name" label="Name" rules={[{ required: true, message: 'Required' }]} />
         <ProFormSelect
           name="profile"
-          label="Profil"
+          label="Profile"
           options={[
-            { label: 'Batubara', value: 'coal' },
-            { label: 'Kantor', value: 'office' },
-            { label: 'Dukungan', value: 'support' },
+            { label: 'Coal', value: 'coal' },
+            { label: 'Office', value: 'office' },
+            { label: 'Support', value: 'support' },
           ]}
-          rules={[{ required: true, message: 'Wajib diisi' }]}
+          rules={[{ required: true, message: 'Required' }]}
         />
-        <ProFormText name="base_present_code" label="Kode Hadir Dasar" rules={[{ required: true, message: 'Wajib diisi' }]} />
-        <ProFormSwitch name="active" label="Aktif" />
+        <ProFormText name="base_present_code" label="Base Present Code" rules={[{ required: true, message: 'Required' }]} />
+        <ProFormSwitch name="active" label="Active" />
       </ModalForm>
     </div>
   );

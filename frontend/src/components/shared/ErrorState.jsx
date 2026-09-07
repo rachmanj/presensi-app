@@ -4,11 +4,11 @@ export default function ErrorState({ description, onRetry }) {
   return (
     <Result
       status="error"
-      title="Gagal memuat data"
+      title="Failed to load data"
       subTitle={description}
       extra={
         <Button type="primary" onClick={onRetry}>
-          Muat Ulang
+          Reload
         </Button>
       }
     />

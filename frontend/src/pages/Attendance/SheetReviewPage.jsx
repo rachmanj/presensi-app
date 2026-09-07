@@ -61,7 +61,7 @@ export default function SheetReviewPage() {
     return (
       <div style={{ padding: 24 }}>
         <ErrorState
-          description={error?.message || 'Grid absensi tidak dapat dimuat.'}
+          description={error?.message || 'Failed to load attendance grid.'}
           onRetry={refetchGrid}
         />
       </div>
@@ -74,7 +74,7 @@ export default function SheetReviewPage() {
 
   const frozenCols = [
     { title: 'No', dataIndex: 'no', fixed: 'left', width: 50 },
-    { title: 'Nama', dataIndex: 'employee_name', fixed: 'left', width: 180, ellipsis: true,
+    { title: 'Name', dataIndex: 'employee_name', fixed: 'left', width: 180, ellipsis: true,
       render: (name, record) => (
         <span>
           {name}
@@ -83,7 +83,7 @@ export default function SheetReviewPage() {
       ),
     },
     { title: 'NIK', dataIndex: 'nik', fixed: 'left', width: 90 },
-    { title: 'Jabatan', dataIndex: 'position', fixed: 'left', width: 140, ellipsis: true },
+    { title: 'Position', dataIndex: 'position', fixed: 'left', width: 140, ellipsis: true },
   ];
 
   const dateCols = Array.from({ length: daysInMonth }, (_, i) => {
@@ -130,9 +130,9 @@ export default function SheetReviewPage() {
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <h3 style={{ margin: 0, flex: 1 }}>
-          Tinjauan: {sheetInfo?.site_code} - {sheetInfo?.period?.label}
+          Review: {sheetInfo?.site_code} - {sheetInfo?.period?.label}
           <span style={{ marginLeft: 12, fontSize: 14, color: isDark ? 'rgba(255,255,255,0.45)' : '#666' }}>
-            ({rows.length} karyawan, {daysInMonth} hari)
+            ({rows.length} employees, {daysInMonth} days)
           </span>
         </h3>
         <Button
@@ -140,11 +140,11 @@ export default function SheetReviewPage() {
           loading={isRefreshing}
           onClick={handleRefresh}
         >
-          Muat Ulang
+          Reload
         </Button>
       </div>
       {isDraftEmpty ? (
-        <Empty description="Sheet belum dibuat. Buka halaman detail sheet lalu klik Buat Sheet." />
+        <Empty description="Sheet not generated yet. Open the sheet detail page and click Generate." />
       ) : (
         <Table
           columns={columns}

@@ -28,7 +28,7 @@ export default function EmployeeMappingPage() {
         ? mappingService.update(editing.id, values)
         : mappingService.create(values),
     onSuccess: () => {
-      message.success('Pemetaan berhasil disimpan');
+      message.success('Mapping saved successfully');
       queryClient.invalidateQueries({ queryKey: ['employee-maps'] });
       queryClient.invalidateQueries({ queryKey: ['unmatched-nips'] });
       setModalOpen(false);
@@ -55,7 +55,7 @@ export default function EmployeeMappingPage() {
     const suggestions = await mappingService.suggest(name);
     if (suggestions[0]) {
       form.setFieldsValue({ nik: suggestions[0].nik });
-      message.info(`Saran: ${suggestions[0].fullname}`);
+      message.info(`Suggestion: ${suggestions[0].fullname}`);
     }
   };
 
@@ -64,25 +64,25 @@ export default function EmployeeMappingPage() {
     { title: 'PIN', dataIndex: 'fingerprint_pin', width: 80 },
     { title: 'NIK', dataIndex: 'nik', width: 100 },
     {
-      title: 'Saldo Cuti',
+      title: 'Leave Balance',
       dataIndex: 'leave_balance',
       width: 100,
       render: (balance) => <LeaveBalanceBadge balance={balance} showInline />,
     },
-    { title: 'Lokasi', dataIndex: 'site_code', width: 80 },
+    { title: 'Site', dataIndex: 'site_code', width: 80 },
     {
-      title: 'Aktif',
+      title: 'Active',
       dataIndex: 'active',
       width: 80,
-      render: (v) => <Tag color={v ? 'green' : 'default'}>{v ? 'Ya' : 'No'}</Tag>,
+      render: (v) => <Tag color={v ? 'green' : 'default'}>{v ? 'Yes' : 'No'}</Tag>,
     },
-    { title: 'Catatan', dataIndex: 'note', ellipsis: true },
+    { title: 'Note', dataIndex: 'note', ellipsis: true },
     {
-      title: 'Aksi',
+      title: 'Actions',
       width: 100,
       render: (_, record) => (
         <Button type="link" size="small" onClick={() => openEdit(record)}>
-          Ubah
+          Edit
         </Button>
       ),
     },
@@ -94,13 +94,13 @@ export default function EmployeeMappingPage() {
     <div style={{ padding: 24 }}>
       <Space style={{ marginBottom: 16 }}>
         <Button type="primary" onClick={() => openCreate()}>
-          Tambah Pemetaan
+          Add Mapping
         </Button>
       </Space>
 
       {isError ? (
         <ErrorState
-          description={error?.message || 'Daftar pemetaan tidak dapat dimuat.'}
+          description={error?.message || 'Failed to load mapping list.'}
           onRetry={refetch}
         />
       ) : (
@@ -111,8 +111,8 @@ export default function EmployeeMappingPage() {
           rowKey="id"
           search={false}
           pagination={{ pageSize: 20 }}
-          headerTitle="Pemetaan Karyawan (NIP → NIK)"
-          locale={{ emptyText: 'Belum ada pemetaan NIP. Tambahkan pemetaan atau pakai saran otomatis.' }}
+          headerTitle="Employee Mapping (NIP → NIK)"
+          locale={{ emptyText: 'No NIP mappings yet. Add a mapping or use auto-suggest.' }}
         />
       )}
 
@@ -120,10 +120,10 @@ export default function EmployeeMappingPage() {
         <ProTable
           columns={[
             { title: 'NIP', dataIndex: 'raw_nip' },
-            { title: 'Nama', dataIndex: 'raw_name' },
+            { title: 'Name', dataIndex: 'raw_name' },
             { title: 'Scan', dataIndex: 'scan_count', width: 80 },
             {
-              title: 'Aksi',
+              title: 'Actions',
               width: 120,
               render: (_, record) => (
                 <Button
@@ -135,7 +135,7 @@ export default function EmployeeMappingPage() {
                     suggest_name: record.raw_name,
                   })}
                 >
-                  Petakan
+                  Map
                 </Button>
               ),
             },
@@ -149,35 +149,35 @@ export default function EmployeeMappingPage() {
       </Card>
 
       <Modal
-        title={editing ? 'Ubah Pemetaan' : 'Pemetaan Baru'}
+        title={editing ? 'Edit Mapping' : 'New Mapping'}
         open={modalOpen}
         onCancel={() => { setModalOpen(false); setEditing(null); }}
         onOk={() => form.submit()}
         confirmLoading={saveMutation.isPending}
-        okText="Simpan"
-        cancelText="Batal"
+        okText="Save"
+        cancelText="Cancel"
       >
         <Form form={form} layout="vertical" onFinish={(v) => saveMutation.mutate(v)}>
-          <Form.Item name="fingerprint_nip" label="NIP Fingerprint" rules={[{ required: true, message: 'Wajib diisi' }]}>
+          <Form.Item name="fingerprint_nip" label="NIP Fingerprint" rules={[{ required: true, message: 'Required' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="fingerprint_pin" label="PIN Fingerprint" rules={[{ required: true, message: 'Wajib diisi' }]}>
+          <Form.Item name="fingerprint_pin" label="PIN Fingerprint" rules={[{ required: true, message: 'Required' }]}>
             <Input />
           </Form.Item>
           <Form.Item name="nik" label="NIK (HERO)">
             <Input />
           </Form.Item>
-          <Form.Item name="site_code" label="Kode Lokasi">
+          <Form.Item name="site_code" label="Site Code">
             <Select allowClear options={['HO', 'APS', 'BO', '017C', '021C', '022C', '023C', '025C'].map((c) => ({ value: c, label: c }))} />
           </Form.Item>
-          <Form.Item name="note" label="Catatan">
+          <Form.Item name="note" label="Note">
             <Input.TextArea rows={2} />
           </Form.Item>
           <Space>
-            <Form.Item name="suggest_name" label="Cocokkan berdasarkan nama" style={{ flex: 1 }}>
-              <Input placeholder="Nama karyawan" />
+            <Form.Item name="suggest_name" label="Match by name" style={{ flex: 1 }}>
+              <Input placeholder="Employee name" />
             </Form.Item>
-            <Button onClick={handleSuggest} style={{ marginTop: 30 }}>Saran</Button>
+            <Button onClick={handleSuggest} style={{ marginTop: 30 }}>Suggest</Button>
           </Space>
         </Form>
       </Modal>

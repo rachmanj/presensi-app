@@ -70,10 +70,10 @@ export default function AppLayout() {
   const handleLogout = async () => {
     try {
       await logout();
-      message.success('Berhasil keluar');
+      message.success('Signed out successfully');
       navigate('/login');
     } catch {
-      message.error('Gagal keluar');
+      message.error('Failed to sign out');
     }
   };
 
@@ -81,11 +81,11 @@ export default function AppLayout() {
     setChangingPassword(true);
     try {
       await changePassword(values);
-      message.success('Kata sandi berhasil diubah');
+      message.success('Password changed successfully');
       setPasswordModalOpen(false);
       passwordForm.resetFields();
     } catch (err) {
-      message.error(err?.response?.data?.message || 'Gagal mengubah kata sandi');
+      message.error(err?.response?.data?.message || 'Failed to change password');
     } finally {
       setChangingPassword(false);
     }
@@ -96,7 +96,7 @@ export default function AppLayout() {
       key: 'user-info',
       label: (
         <div style={{ padding: '4px 0' }}>
-          <div style={{ fontWeight: 600 }}>{user?.name || 'Pengguna'}</div>
+          <div style={{ fontWeight: 600 }}>{user?.name || 'User'}</div>
           <div style={{ fontSize: 12, opacity: 0.65 }}>
             {ROLE_LABELS[user?.role] || user?.role}
           </div>
@@ -141,7 +141,7 @@ export default function AppLayout() {
         avatarProps={{
           src: null,
           icon: <UserOutlined />,
-          title: user?.name || 'Pengguna',
+          title: user?.name || 'User',
           render: (_, dom) => (
             <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
               {dom}
@@ -153,7 +153,7 @@ export default function AppLayout() {
       </ProLayout>
 
       <Modal
-        title="Ubah Kata Sandi"
+        title="Change Password"
         open={passwordModalOpen}
         onCancel={() => {
           setPasswordModalOpen(false);
@@ -161,8 +161,8 @@ export default function AppLayout() {
         }}
         onOk={() => passwordForm.submit()}
         confirmLoading={changingPassword}
-        okText="Simpan"
-        cancelText="Batal"
+        okText="Save"
+        cancelText="Cancel"
         destroyOnClose
       >
         <Form
@@ -172,33 +172,33 @@ export default function AppLayout() {
         >
           <Form.Item
             name="current_password"
-            label="Kata Sandi Saat Ini"
-            rules={[{ required: true, message: 'Masukkan kata sandi saat ini' }]}
+            label="Current Password"
+            rules={[{ required: true, message: 'Enter current password' }]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item
             name="password"
-            label="Kata Sandi Baru"
+            label="New Password"
             rules={[
-              { required: true, message: 'Masukkan kata sandi baru' },
-              { min: 8, message: 'Minimal 8 karakter' },
+              { required: true, message: 'Enter new password' },
+              { min: 8, message: 'Minimum 8 characters' },
             ]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item
             name="password_confirmation"
-            label="Konfirmasi Kata Sandi Baru"
+            label="Confirm New Password"
             dependencies={['password']}
             rules={[
-              { required: true, message: 'Konfirmasi kata sandi baru' },
+              { required: true, message: 'Confirm new password' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('Kata sandi tidak cocok'));
+                  return Promise.reject(new Error('Passwords do not match'));
                 },
               }),
             ]}

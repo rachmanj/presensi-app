@@ -22,7 +22,7 @@ export default function MatrixConfigPage() {
   useEffect(() => { loadGrid(); }, []);
 
   const gridColumns = [
-    { title: 'Asal \\ Kunjungan', dataIndex: 'home_site_code', fixed: 'left', width: 100 },
+    { title: 'Home \\ Visit', dataIndex: 'home_site_code', fixed: 'left', width: 100 },
     ...gridData.sites.map((site) => ({
       title: site,
       dataIndex: ['cells', site],
@@ -32,28 +32,28 @@ export default function MatrixConfigPage() {
   ];
 
   const listColumns = [
-    { title: 'Asal', dataIndex: 'home_site_code', width: 80 },
-    { title: 'Kunjungan', dataIndex: 'visit_site_code', width: 80 },
+    { title: 'Home', dataIndex: 'home_site_code', width: 80 },
+    { title: 'Visit', dataIndex: 'visit_site_code', width: 80 },
     { title: 'Code', dataIndex: 'code', width: 80 },
-    { title: 'Berlaku Dari', dataIndex: 'effective_from', width: 120 },
-    { title: 'Berlaku Sampai', dataIndex: 'effective_to', width: 120 },
+    { title: 'Effective From', dataIndex: 'effective_from', width: 120 },
+    { title: 'Effective To', dataIndex: 'effective_to', width: 120 },
     {
-      title: 'Aksi',
+      title: 'Actions',
       valueType: 'option',
       render: (_, record) => [
-        <a key="edit" onClick={() => setEditing(record)}>Ubah</a>,
+        <a key="edit" onClick={() => setEditing(record)}>Edit</a>,
         <Popconfirm
           key="delete"
-          title="Hapus aturan matriks ini?"
-          okText="Hapus"
-          cancelText="Batal"
+          title="Delete this matrix rule?"
+          okText="Delete"
+          cancelText="Cancel"
           onConfirm={async () => {
             await adminService.matrixRules.remove(record.id);
-            message.success('Berhasil dihapus');
+            message.success('Deleted successfully');
             loadGrid();
           }}
         >
-          <a>Hapus</a>
+          <a>Delete</a>
         </Popconfirm>,
       ],
     },
@@ -61,7 +61,7 @@ export default function MatrixConfigPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Typography.Title level={4}>Grid Matriks</Typography.Title>
+      <Typography.Title level={4}>Matrix Grid</Typography.Title>
       <Table
         loading={loading}
         dataSource={gridData.grid}
@@ -74,12 +74,12 @@ export default function MatrixConfigPage() {
       />
 
       <ProTable
-        headerTitle="Aturan Matriks"
+        headerTitle="Matrix Rules"
         rowKey="id"
         search={false}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => setEditing({ effective_from: '2025-01-01' })}>
-            Tambah Aturan
+            Add Rule
           </Button>,
         ]}
         request={async () => ({ data: await adminService.matrixRules.list(), success: true })}
@@ -87,11 +87,11 @@ export default function MatrixConfigPage() {
       />
 
       <ModalForm
-        title={editing?.id ? 'Ubah Aturan Matriks' : 'Tambah Aturan Matriks'}
+        title={editing?.id ? 'Edit Matrix Rule' : 'Add Matrix Rule'}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
         initialValues={editing || {}}
-        modalProps={{ okText: 'Simpan', cancelText: 'Batal' }}
+        modalProps={{ okText: 'Save', cancelText: 'Cancel' }}
         onFinish={async (values) => {
           const payload = {
             ...values,
@@ -100,10 +100,10 @@ export default function MatrixConfigPage() {
           };
           if (editing?.id) {
             await adminService.matrixRules.update(editing.id, payload);
-            message.success('Berhasil diperbarui');
+            message.success('Updated successfully');
           } else {
             await adminService.matrixRules.create(payload);
-            message.success('Berhasil dibuat');
+            message.success('Created successfully');
           }
           setEditing(null);
           loadGrid();
@@ -112,19 +112,19 @@ export default function MatrixConfigPage() {
       >
         <ProFormSelect
           name="home_site_code"
-          label="Lokasi Asal"
+          label="Home Site"
           options={gridData.sites.map((s) => ({ label: s, value: s }))}
-          rules={[{ required: true, message: 'Wajib diisi' }]}
+          rules={[{ required: true, message: 'Required' }]}
         />
         <ProFormSelect
           name="visit_site_code"
-          label="Lokasi Kunjungan"
+          label="Visit Site"
           options={gridData.sites.map((s) => ({ label: s, value: s }))}
-          rules={[{ required: true, message: 'Wajib diisi' }]}
+          rules={[{ required: true, message: 'Required' }]}
         />
-        <ProFormText name="code" label="Code" rules={[{ required: true, message: 'Wajib diisi' }]} />
-        <ProFormDatePicker name="effective_from" label="Berlaku Dari" rules={[{ required: true, message: 'Wajib diisi' }]} />
-        <ProFormDatePicker name="effective_to" label="Berlaku Sampai" />
+        <ProFormText name="code" label="Code" rules={[{ required: true, message: 'Required' }]} />
+        <ProFormDatePicker name="effective_from" label="Effective From" rules={[{ required: true, message: 'Required' }]} />
+        <ProFormDatePicker name="effective_to" label="Effective To" />
       </ModalForm>
     </div>
   );

@@ -39,7 +39,7 @@ export default function ImportListPage() {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
-    { title: 'Nama File', dataIndex: 'original_filename', ellipsis: true },
+    { title: 'Filename', dataIndex: 'original_filename', ellipsis: true },
     { title: 'Format', dataIndex: 'format', width: 140 },
     {
       title: 'Status',
@@ -48,23 +48,23 @@ export default function ImportListPage() {
       render: (s) => <Tag color={statusColors[s]}>{s}</Tag>,
     },
     { title: 'Total', dataIndex: 'rows_total', width: 70 },
-    { title: 'Tercocok', dataIndex: 'rows_matched', width: 80 },
-    { title: 'Belum Tercocok', dataIndex: 'rows_unmatched', width: 90 },
-    { title: 'Diunggah', dataIndex: 'uploaded_by', width: 120 },
+    { title: 'Matched', dataIndex: 'rows_matched', width: 80 },
+    { title: 'Unmatched', dataIndex: 'rows_unmatched', width: 90 },
+    { title: 'Uploaded', dataIndex: 'uploaded_by', width: 120 },
     {
-      title: 'Aksi',
+      title: 'Actions',
       width: 120,
       render: (_, record) => (
         <Space>
-          <Link to={`/import/upload?sheet=${activeSheetId}`}>Unggah</Link>
+          <Link to={`/import/upload?sheet=${activeSheetId}`}>Upload</Link>
           <Popconfirm
-            title="Hapus impor ini?"
-            okText="Hapus"
-            cancelText="Batal"
+            title="Delete this import?"
+            okText="Delete"
+            cancelText="Cancel"
             onConfirm={() => importService.remove(record.id)}
           >
             <Button type="link" size="small" danger>
-              Hapus
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -76,22 +76,22 @@ export default function ImportListPage() {
     <div style={{ padding: 24 }}>
       <Space style={{ marginBottom: 16 }}>
         <Select
-          placeholder="Pilih sheet"
+          placeholder="Select sheet"
           style={{ width: 280 }}
           value={activeSheetId}
           onChange={setSheetId}
           options={sheets?.map((s) => ({
             value: s.id,
-            label: `${s.site_code} - Periode ${s.period_id}`,
+            label: `${s.site_code} - Period ${s.period_id}`,
           }))}
         />
         <Link to={`/import/upload?sheet=${activeSheetId || ''}`}>
-          <Button type="primary">Unggah File Baru</Button>
+          <Button type="primary">Upload New File</Button>
         </Link>
       </Space>
       {isError ? (
         <ErrorState
-          description={error?.message || 'Daftar import tidak dapat dimuat.'}
+          description={error?.message || 'Failed to load import list.'}
           onRetry={refetch}
         />
       ) : (
@@ -102,8 +102,8 @@ export default function ImportListPage() {
           rowKey="id"
           search={false}
           pagination={{ pageSize: 20 }}
-          headerTitle="Impor Fingerprint"
-          locale={{ emptyText: 'Belum ada import. Unggah file fingerprint untuk memulai.' }}
+          headerTitle="Fingerprint Import"
+          locale={{ emptyText: 'No imports yet. Upload a fingerprint file to start.' }}
         />
       )}
     </div>
