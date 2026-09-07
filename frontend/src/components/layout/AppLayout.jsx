@@ -14,31 +14,31 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 
 const ALL_MENU_ROUTES = [
-  { path: '/dashboard', name: 'Dasbor', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/import', name: 'Impor', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/mapping', name: 'Pemetaan', roles: ['hr_supervisor', 'admin'] },
-  { path: '/attendance', name: 'Kehadiran', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/export', name: 'Ekspor', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/comparison', name: 'Perbandingan', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
-  { path: '/audit', name: 'Log Audit', roles: ['admin'] },
+  { path: '/dashboard', name: 'Dashboard', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/import', name: 'Import', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/mapping', name: 'Mapping', roles: ['hr_supervisor', 'admin'] },
+  { path: '/attendance', name: 'Attendance', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/export', name: 'Export', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/comparison', name: 'Comparison', roles: ['hr_staff', 'hr_supervisor', 'admin'] },
+  { path: '/audit', name: 'Audit Log', roles: ['admin'] },
   {
     path: '/admin',
     name: 'Admin',
     roles: ['hr_supervisor', 'admin'],
     children: [
-      { path: '/admin/sites', name: 'Lokasi', roles: ['admin'] },
-      { path: '/admin/matrix', name: 'Matriks', roles: ['admin'] },
-      { path: '/admin/daytype-codes', name: 'Kode Hari', roles: ['admin'] },
-      { path: '/admin/holidays', name: 'Hari Libur', roles: ['hr_supervisor', 'admin'] },
-      { path: '/admin/templates', name: 'Template', roles: ['admin'] },
+      { path: '/admin/sites', name: 'Sites', roles: ['admin'] },
+      { path: '/admin/matrix', name: 'Matrix', roles: ['admin'] },
+      { path: '/admin/daytype-codes', name: 'Daytype Codes', roles: ['admin'] },
+      { path: '/admin/holidays', name: 'Holidays', roles: ['hr_supervisor', 'admin'] },
+      { path: '/admin/templates', name: 'Templates', roles: ['admin'] },
     ],
   },
 ];
 
 const ROLE_LABELS = {
   admin: 'Admin',
-  hr_supervisor: 'Supervisor HR',
-  hr_staff: 'Staf HR',
+  hr_supervisor: 'Supervisor',
+  hr_staff: 'Staff',
 };
 
 function filterMenuByRole(routes, role) {
@@ -108,20 +108,20 @@ export default function AppLayout() {
     {
       key: 'change-password',
       icon: <KeyOutlined />,
-      label: 'Ubah Kata Sandi',
+      label: 'Change Password',
       onClick: () => setPasswordModalOpen(true),
     },
     {
       key: 'theme',
       icon: isDark ? <BulbFilled /> : <BulbOutlined />,
-      label: isDark ? 'Mode Terang' : 'Mode Gelap',
+      label: isDark ? 'Light Mode' : 'Dark Mode',
       onClick: toggleTheme,
     },
     { type: 'divider' },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Keluar',
+      label: 'Logout',
       danger: true,
       onClick: handleLogout,
     },
