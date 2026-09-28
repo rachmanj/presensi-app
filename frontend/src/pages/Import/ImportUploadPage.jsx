@@ -9,6 +9,16 @@ import { importService } from '../../services/importService';
 
 const { Dragger } = Upload;
 
+const KNOWN_SITE_CODES = ['HO', 'APS', 'BO', '017C', '021C', '022C', '023C', '025C'];
+
+function detectSiteCodeInFilename(filename) {
+  if (!filename) return null;
+  const upper = filename.toUpperCase();
+  return (
+    KNOWN_SITE_CODES.find((code) => new RegExp(`\\b${code}\\b`).test(upper)) || null
+  );
+}
+
 export default function ImportUploadPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -19,6 +29,7 @@ export default function ImportUploadPage() {
   const [parseStatus, setParseStatus] = useState(null);
 
   const {
+    data: sheet,
     isLoading: sheetLoading,
     isError: sheetError,
     error: sheetErrorObj,
@@ -74,6 +85,14 @@ export default function ImportUploadPage() {
     );
   }
 
+  const filenameSiteCode = importRecord
+    ? detectSiteCodeInFilename(importRecord.original_filename)
+    : null;
+  const siteMismatch =
+    filenameSiteCode && sheet?.site_code && filenameSiteCode !== sheet.site_code
+      ? filenameSiteCode
+      : null;
+
   if (sheetError) {
     return (
       <div style={{ padding: 24 }}>
@@ -107,11 +126,22 @@ export default function ImportUploadPage() {
 
         {importRecord && (
           <Descriptions bordered size="small" style={{ marginTop: 16 }} column={2}>
+            <Descriptions.Item label="Sheet">{sheet?.site_code}</Descriptions.Item>
             <Descriptions.Item label="Import ID">{importRecord.id}</Descriptions.Item>
             <Descriptions.Item label="Format">{importRecord.format}</Descriptions.Item>
             <Descriptions.Item label="Status">{parseStatus?.status || importRecord.status}</Descriptions.Item>
+            <Descriptions.Item label="Total">{parseStatus?.rows_total ?? 'Pending'}</Descriptions.Item>
             <Descriptions.Item label="Matched">{parseStatus?.rows_matched ?? 'Pending'}</Descriptions.Item>
+            <Descriptions.Item label="Unmatched">{parseStatus?.rows_unmatched ?? 'Pending'}</Descriptions.Item>
           </Descriptions>
+        )}
+
+        {siteMismatch && (
+          <Alert
+            type="warning"
+            style={{ marginTop: 16 }}
+            message={`Filename indicates ${siteMismatch} but the file is stored under sheet ${sheet.site_code}. Matching uses the sheet site - delete this import and re-upload on the correct sheet if this is wrong.`}
+          />
         )}
 
         {parseStatus?.status === 'parsed' && (

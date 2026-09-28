@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ProTable } from '@ant-design/pro-components';
 import { Button, Select, Space, Tag, Popconfirm } from 'antd';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,7 @@ const statusColors = {
 
 export default function ImportListPage() {
   const [sheetId, setSheetId] = useState(null);
+  const queryClient = useQueryClient();
 
   const { data: periods } = useQuery({
     queryKey: ['periods'],
@@ -39,6 +40,7 @@ export default function ImportListPage() {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
+    { title: 'Sheet', dataIndex: 'site_code', width: 80 },
     { title: 'Filename', dataIndex: 'original_filename', ellipsis: true },
     { title: 'Format', dataIndex: 'format', width: 140 },
     {
@@ -65,6 +67,20 @@ export default function ImportListPage() {
           >
             <Button type="link" size="small" danger>
               Delete
+            </Button>
+          </Popconfirm>
+          <Popconfirm
+            title="Re-process this file with the latest NIP mapping?"
+            okText="Reparse"
+            cancelText="Cancel"
+            onConfirm={() =>
+              importService
+                .reparse(record.id)
+                .then(() => queryClient.invalidateQueries({ queryKey: ['imports'] }))
+            }
+          >
+            <Button type="link" size="small">
+              Reparse
             </Button>
           </Popconfirm>
         </Space>
