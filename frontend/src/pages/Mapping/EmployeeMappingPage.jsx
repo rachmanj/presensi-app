@@ -143,7 +143,12 @@ export default function EmployeeMappingPage() {
           dataSource={unmatched || []}
           rowKey="raw_nip"
           search={false}
-          pagination={false}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            size: 'small',
+          }}
           size="small"
         />
       </Card>
