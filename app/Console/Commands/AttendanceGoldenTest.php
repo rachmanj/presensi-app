@@ -10,6 +10,7 @@ use App\Models\EmployeeMap;
 use App\Models\FingerprintImport;
 use App\Models\HeroEmployeeCache;
 use App\Models\ReportTemplate;
+use App\Models\Site;
 use App\Services\AttendanceCodeEngine;
 use App\Services\FingerprintParser;
 use App\Services\ReportExporter;
@@ -429,7 +430,7 @@ class AttendanceGoldenTest extends Command
 
         foreach ($golden as $emp) {
             $cache = HeroEmployeeCache::where('nik', $emp['nik'])->first();
-            $homeSite = $cache?->project_code ?? $defaultSite;
+            $homeSite = Site::resolveCode($cache?->project_code) ?? $defaultSite;
             $lots = [];
 
             foreach ($emp['cells'] as $day => $code) {
@@ -519,7 +520,9 @@ class AttendanceGoldenTest extends Command
                 [
                     'employee_name' => $emp['name'],
                     'position' => $emp['position'],
-                    'home_site_code' => HeroEmployeeCache::where('nik', $emp['nik'])->value('project_code') ?? $sheet->site_code,
+                    'home_site_code' => Site::resolveCode(
+                        HeroEmployeeCache::where('nik', $emp['nik'])->value('project_code')
+                    ) ?? $sheet->site_code,
                     'working_days' => 0,
                 ],
             );

@@ -33,4 +33,15 @@ class Site extends Model
     {
         return $this->hasMany(AttendanceSheet::class, 'site_code', 'code');
     }
+
+    public static function resolveCode(?string $heroProjectCode): ?string
+    {
+        if ($heroProjectCode === null || $heroProjectCode === '') {
+            return $heroProjectCode;
+        }
+
+        $aliases = config('presensi.site_code_aliases', []);
+
+        return $aliases[$heroProjectCode] ?? $heroProjectCode;
+    }
 }

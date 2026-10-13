@@ -6,6 +6,7 @@ use App\Models\AttendanceRow;
 use App\Models\AttendanceSheet;
 use App\Models\FingerprintScan;
 use App\Models\HeroEmployeeCache;
+use App\Models\Site;
 use App\Services\AttendanceCodeEngine;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -78,7 +79,7 @@ class GenerateAttendanceSheet implements ShouldQueue
                 'nik' => $emp->nik,
                 'employee_name' => $emp->fullname,
                 'position' => $emp->position,
-                'home_site_code' => $emp->project_code ?? $siteCode,
+                'home_site_code' => Site::resolveCode($emp->project_code) ?? $siteCode,
                 'working_days' => 0,
                 'summary' => null,
             ]);
@@ -109,7 +110,7 @@ class GenerateAttendanceSheet implements ShouldQueue
                 'nik' => $scan->resolved_nik,
                 'employee_name' => $cache?->fullname ?? $scan->raw_name ?? $scan->resolved_nik,
                 'position' => $cache?->position,
-                'home_site_code' => $cache?->project_code ?? $siteCode,
+                'home_site_code' => Site::resolveCode($cache?->project_code) ?? $siteCode,
                 'working_days' => 0,
                 'summary' => null,
             ]);

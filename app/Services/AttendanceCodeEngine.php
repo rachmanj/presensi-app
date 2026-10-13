@@ -9,6 +9,7 @@ use App\Models\AttendanceRow;
 use App\Models\AttendanceSheet;
 use App\Models\FingerprintScan;
 use App\Models\HeroEmployeeCache;
+use App\Models\Site;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -138,7 +139,7 @@ class AttendanceCodeEngine
         }
 
         // Step 5: matrix lookup
-        $homeSite = $row->home_site_code ?? $siteCode;
+        $homeSite = $this->resolveEffectiveHomeSite($row);
         try {
             $matrixResult = $this->resolvePresenceCode($row, $date, $visitSite);
             $baseCode = $matrixResult['code'];
@@ -316,9 +317,21 @@ class AttendanceCodeEngine
 
     private function resolvePresenceCode(AttendanceRow $row, Carbon $date, ?string $visitSite): array
     {
-        $homeSite = $row->home_site_code ?? $row->sheet->site_code;
+        $homeSite = $this->resolveEffectiveHomeSite($row);
 
         return $this->matrixResolver->resolve($homeSite, $visitSite, $date);
+    }
+
+    private function resolveEffectiveHomeSite(AttendanceRow $row): string
+    {
+        $sheetSite = $row->sheet->site_code;
+        $normalized = Site::resolveCode($row->home_site_code ?? $sheetSite);
+
+        if (Site::where('code', $normalized)->exists()) {
+            return $normalized;
+        }
+
+        return $sheetSite;
     }
 
     private function getHeroActivity(string $nik, Carbon $date, AttendanceSheet $sheet): array
