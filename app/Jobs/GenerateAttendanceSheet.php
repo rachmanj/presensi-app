@@ -8,8 +8,6 @@ use App\Models\FingerprintScan;
 use App\Models\HeroEmployeeCache;
 use App\Models\Site;
 use App\Services\AttendanceCodeEngine;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -34,31 +32,7 @@ class GenerateAttendanceSheet implements ShouldQueue
         try {
             $this->ensureRowsExist();
 
-            $period = $this->sheet->period;
-            $start = Carbon::create($period->year, $period->month, 1)->startOfDay();
-            $end = $start->copy()->endOfMonth();
-            $rows = $this->sheet->rows()->get();
-            $rowCount = $rows->count();
-
-            Log::info('Attendance sheet generation started', [
-                'sheet_id' => $this->sheet->id,
-                'row_count' => $rowCount,
-            ]);
-
-            $processed = 0;
-            foreach ($rows as $row) {
-                foreach (CarbonPeriod::create($start, $end) as $date) {
-                    $engine->generateForCell($row, $date, $this->sheet);
-                }
-                $engine->updateRowSummary($row, $this->sheet);
-                $processed++;
-                if ($processed % 10 === 0) {
-                    Log::info('Attendance sheet generation progress', [
-                        'sheet_id' => $this->sheet->id,
-                        'rows_processed' => $processed,
-                    ]);
-                }
-            }
+            $engine->generateForSheet($this->sheet);
 
             $this->sheet->update(['status' => 'review']);
         } catch (\Throwable $e) {

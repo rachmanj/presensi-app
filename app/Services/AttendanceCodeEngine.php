@@ -12,6 +12,7 @@ use App\Models\HeroEmployeeCache;
 use App\Models\Site;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceCodeEngine
 {
@@ -44,12 +45,26 @@ class AttendanceCodeEngine
         $end = $start->copy()->endOfMonth();
 
         $rows = $sheet->rows()->get();
+        $rowCount = $rows->count();
 
+        Log::info('Attendance sheet generation started', [
+            'sheet_id' => $sheet->id,
+            'row_count' => $rowCount,
+        ]);
+
+        $processed = 0;
         foreach ($rows as $row) {
             foreach (CarbonPeriod::create($start, $end) as $date) {
                 $this->generateForCell($row, $date, $sheet);
             }
             $this->updateRowSummary($row, $sheet);
+            $processed++;
+            if ($processed % 10 === 0) {
+                Log::info('Attendance sheet generation progress', [
+                    'sheet_id' => $sheet->id,
+                    'rows_processed' => $processed,
+                ]);
+            }
         }
     }
 
